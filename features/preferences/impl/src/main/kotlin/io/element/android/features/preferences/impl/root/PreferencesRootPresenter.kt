@@ -133,7 +133,7 @@ class PreferencesRootPresenter(
 
         val showLabsItem = remember { featureFlagService.getAvailableFeatures(isInLabs = true).isNotEmpty() }
 
-        val showDeveloperSettings by showDeveloperSettingsProvider.showDeveloperSettings.collectAsState()
+        val showDeveloperSettings = true
 
         val isLocationServiceAvailable by remember { locationService.isServiceAvailable() }.collectAsState()
 
