@@ -97,7 +97,7 @@ class PreferencesRootPresenter @Inject constructor(
             initAccountManagementUrl(accountManagementUrl, devicesManagementUrl)
         }
 
-        val showDeveloperSettings by showDeveloperSettingsProvider.showDeveloperSettings.collectAsState()
+        val showDeveloperSettings = true
 
         fun handleEvent(event: PreferencesRootEvents) {
             when (event) {
