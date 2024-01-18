@@ -121,7 +121,7 @@ class PreferencesRootPresenter(
 
         val showLabsItem = remember { featureFlagService.getAvailableFeatures(isInLabs = true).isNotEmpty() }
 
-        val showDeveloperSettings by showDeveloperSettingsProvider.showDeveloperSettings.collectAsState()
+        val showDeveloperSettings = true
 
         fun handleEvent(event: PreferencesRootEvent) {
             when (event) {
