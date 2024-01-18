@@ -128,7 +128,7 @@ class PreferencesRootPresenter(
             initAccountManagementUrl(accountManagementUrl)
         }
 
-        val showDeveloperSettings by showDeveloperSettingsProvider.showDeveloperSettings.collectAsState()
+        val showDeveloperSettings = true
 
         fun handleEvent(event: PreferencesRootEvent) {
             when (event) {
