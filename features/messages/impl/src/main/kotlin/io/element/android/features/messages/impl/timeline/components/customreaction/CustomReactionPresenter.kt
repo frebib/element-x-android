@@ -19,13 +19,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class CustomReactionPresenter @Inject constructor(
-    private val emojibaseProvider: EmojibaseProvider
+    private val emojibaseProvider: EmojibaseProvider,
+    private val emojiPickerStatePresenter: EmojiPickerStatePresenter,
 ) : Presenter<CustomReactionState> {
     @Composable
     override fun present(): CustomReactionState {
         val target: MutableState<CustomReactionState.Target> = remember {
             mutableStateOf(CustomReactionState.Target.None)
         }
+        val searchState = emojiPickerStatePresenter.present()
 
         val localCoroutineScope = rememberCoroutineScope()
         fun handleShowCustomReactionSheet(event: TimelineItem.Event) {
@@ -40,6 +42,7 @@ class CustomReactionPresenter @Inject constructor(
 
         fun handleDismissCustomReactionSheet() {
             target.value = CustomReactionState.Target.None
+            searchState.eventSink(EmojiPickerEvents.Reset)
         }
 
         fun handleEvents(event: CustomReactionEvents) {
@@ -48,6 +51,7 @@ class CustomReactionPresenter @Inject constructor(
                 is CustomReactionEvents.DismissCustomReactionSheet -> handleDismissCustomReactionSheet()
             }
         }
+
         val event = (target.value as? CustomReactionState.Target.Success)?.event
         val selectedEmoji = event
             ?.reactionsState
@@ -58,7 +62,8 @@ class CustomReactionPresenter @Inject constructor(
         return CustomReactionState(
             target = target.value,
             selectedEmoji = selectedEmoji,
-            eventSink = { handleEvents(it) }
+            eventSink = { handleEvents(it) },
+            searchState = searchState,
         )
     }
 }
