@@ -34,6 +34,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -46,6 +47,10 @@ import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.text.toSp
 import io.element.android.libraries.designsystem.theme.components.Icon
+import io.element.android.libraries.designsystem.theme.components.SearchBar
+import io.element.android.libraries.designsystem.theme.components.SearchBarResultState
+import io.element.android.libraries.designsystem.theme.components.Text
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.launch
@@ -56,12 +61,28 @@ fun EmojiPicker(
     onEmojiSelected: (Emoji) -> Unit,
     emojibaseStore: EmojibaseStore,
     selectedEmojis: ImmutableSet<String>,
+    state: EmojiPickerState,
     modifier: Modifier = Modifier,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val categories = remember { emojibaseStore.categories }
     val pagerState = rememberPagerState(pageCount = { EmojibaseCategory.entries.size })
+
     Column(modifier) {
+        EmojiPickerSearchBar(
+            query = state.searchQuery,
+            state = state.searchResults,
+            active = state.isSearchActive,
+            selectedEmojis = selectedEmojis,
+            onActiveChanged = { state.eventSink(EmojiPickerEvents.OnSearchActiveChanged(it)) },
+            onTextChange = { state.eventSink(EmojiPickerEvents.UpdateSearchQuery(it)) },
+            onEmojiSelected = {
+                state.eventSink(EmojiPickerEvents.OnSearchActiveChanged(false))
+                onEmojiSelected(it)
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+
         SecondaryTabRow(
             selectedTabIndex = pagerState.currentPage,
         ) {
@@ -108,6 +129,48 @@ fun EmojiPicker(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EmojiPickerSearchBar(
+    query: String,
+    state: SearchBarResultState<ImmutableList<Emoji>>,
+    active: Boolean,
+    selectedEmojis: ImmutableSet<String>,
+    onActiveChanged: (Boolean) -> Unit,
+    onTextChange: (String) -> Unit,
+    onEmojiSelected: (Emoji) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    SearchBar(
+        query = query,
+        onQueryChange = onTextChange,
+        active = active,
+        onActiveChange = onActiveChanged,
+        placeHolderTitle = "Search for emoji",
+        resultState = state,
+        resultHandler = {results ->
+            LazyVerticalGrid(
+                modifier = Modifier.fillMaxSize(),
+                columns = GridCells.Adaptive(minSize = 48.dp),
+                contentPadding = PaddingValues(vertical = 10.dp, horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                items(results, key = { it.unicode }) { item ->
+                    EmojiItem(
+                        modifier = Modifier.aspectRatio(1f),
+                        item = item,
+                        isSelected = selectedEmojis.contains(item.unicode),
+                        onEmojiSelected = onEmojiSelected,
+                        emojiSize = 32.dp.toSp(),
+                    )
+                }
+            }
+        },
+        modifier = modifier,
+    )
+}
+
 @PreviewsDayNight
 @Composable
 internal fun EmojiPickerPreview() = ElementPreview {
@@ -115,6 +178,7 @@ internal fun EmojiPickerPreview() = ElementPreview {
         onEmojiSelected = {},
         emojibaseStore = EmojibaseDatasource().load(LocalContext.current),
         selectedEmojis = persistentSetOf("😀", "😄", "😃"),
+        state = EmojiPickerState(false, "", SearchBarResultState.Results(listOf()), {}),
         modifier = Modifier.fillMaxWidth(),
     )
 }

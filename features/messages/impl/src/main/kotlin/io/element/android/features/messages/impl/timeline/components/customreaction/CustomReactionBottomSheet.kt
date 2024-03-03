@@ -60,6 +60,7 @@ fun CustomReactionBottomSheet(
                 onEmojiSelected = ::onEmojiSelectedDismiss,
                 emojibaseStore = target.emojibaseStore,
                 selectedEmojis = state.selectedEmoji,
+                state = state.searchState,
                 modifier = Modifier.fillMaxSize(),
             )
         }

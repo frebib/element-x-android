@@ -28,7 +28,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class CustomReactionPresenter @Inject constructor(
-    private val emojibaseProvider: EmojibaseProvider
+    private val emojibaseProvider: EmojibaseProvider,
+    private val emojiPickerStatePresenter: EmojiPickerStatePresenter,
 ) : Presenter<CustomReactionState> {
     @Composable
     override fun present(): CustomReactionState {
@@ -67,7 +68,8 @@ class CustomReactionPresenter @Inject constructor(
         return CustomReactionState(
             target = target.value,
             selectedEmoji = selectedEmoji,
-            eventSink = { handleEvents(it) }
+            eventSink = { handleEvents(it) },
+            searchState = emojiPickerStatePresenter.present(),
         )
     }
 }
