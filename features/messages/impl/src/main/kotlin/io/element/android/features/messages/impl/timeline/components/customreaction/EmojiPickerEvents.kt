@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 New Vector Ltd
+ * Copyright (c) 2024 New Vector Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-package io.element.android.features.preferences.impl.advanced
+package io.element.android.features.messages.impl.timeline.components.customreaction
 
-import io.element.android.compound.theme.Theme
-
-data class AdvancedSettingsState(
-    val isDeveloperModeEnabled: Boolean,
-    val isSharePresenceEnabled: Boolean,
-    val isReactionPickerSearchEnabled: Boolean,
-    val theme: Theme,
-    val showChangeThemeDialog: Boolean,
-    val eventSink: (AdvancedSettingsEvents) -> Unit
-)
+sealed interface EmojiPickerEvents {
+    data class OnSearchActiveChanged(val active: Boolean) : EmojiPickerEvents
+    data class UpdateSearchQuery(val query: String) : EmojiPickerEvents
+    data object Reset : EmojiPickerEvents
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 New Vector Ltd
+ * Copyright (c) 2024 New Vector Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package io.element.android.features.preferences.impl.advanced
+package io.element.android.features.messages.impl.timeline.components.customreaction
 
-import io.element.android.compound.theme.Theme
+import io.element.android.emojibasebindings.Emoji
+import io.element.android.libraries.designsystem.theme.components.SearchBarResultState
+import kotlinx.collections.immutable.ImmutableList
 
-data class AdvancedSettingsState(
-    val isDeveloperModeEnabled: Boolean,
-    val isSharePresenceEnabled: Boolean,
-    val isReactionPickerSearchEnabled: Boolean,
-    val theme: Theme,
-    val showChangeThemeDialog: Boolean,
-    val eventSink: (AdvancedSettingsEvents) -> Unit
+data class EmojiPickerState(
+    val startActive: Boolean,
+    val isSearchActive: Boolean,
+    val searchQuery: String,
+    val searchResults: SearchBarResultState<ImmutableList<Emoji>>,
+    val eventSink: (EmojiPickerEvents) -> Unit,
 )

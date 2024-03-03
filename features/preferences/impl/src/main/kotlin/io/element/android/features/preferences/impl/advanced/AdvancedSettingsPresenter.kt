@@ -44,6 +44,9 @@ class AdvancedSettingsPresenter @Inject constructor(
         val isSharePresenceEnabled by sessionPreferencesStore
             .isSharePresenceEnabled()
             .collectAsState(initial = true)
+        val isReactionPickerSearchEnabled by sessionPreferencesStore
+            .isReactionPickerSearchEnabled()
+            .collectAsState(initial = true)
         val theme by remember {
             appPreferencesStore.getThemeFlow().mapToTheme()
         }
@@ -58,6 +61,9 @@ class AdvancedSettingsPresenter @Inject constructor(
                 is AdvancedSettingsEvents.SetSharePresenceEnabled -> localCoroutineScope.launch {
                     sessionPreferencesStore.setSharePresence(event.enabled)
                 }
+                is AdvancedSettingsEvents.SetReactionPickerSearchEnabled -> localCoroutineScope.launch {
+                    sessionPreferencesStore.setReactionPickerSearch(event.enabled)
+                }
                 AdvancedSettingsEvents.CancelChangeTheme -> showChangeThemeDialog = false
                 AdvancedSettingsEvents.ChangeTheme -> showChangeThemeDialog = true
                 is AdvancedSettingsEvents.SetTheme -> localCoroutineScope.launch {
@@ -70,6 +76,7 @@ class AdvancedSettingsPresenter @Inject constructor(
         return AdvancedSettingsState(
             isDeveloperModeEnabled = isDeveloperModeEnabled,
             isSharePresenceEnabled = isSharePresenceEnabled,
+            isReactionPickerSearchEnabled = isReactionPickerSearchEnabled,
             theme = theme,
             showChangeThemeDialog = showChangeThemeDialog,
             eventSink = { handleEvents(it) }
