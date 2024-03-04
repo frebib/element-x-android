@@ -36,6 +36,7 @@ class CustomReactionPresenter @Inject constructor(
         val target: MutableState<CustomReactionState.Target> = remember {
             mutableStateOf(CustomReactionState.Target.None)
         }
+        val searchState = emojiPickerStatePresenter.present()
 
         val localCoroutineScope = rememberCoroutineScope()
         fun handleShowCustomReactionSheet(event: TimelineItem.Event) {
@@ -50,6 +51,7 @@ class CustomReactionPresenter @Inject constructor(
 
         fun handleDismissCustomReactionSheet() {
             target.value = CustomReactionState.Target.None
+            searchState.eventSink(EmojiPickerEvents.OnSearchActiveChanged(false))
         }
 
         fun handleEvents(event: CustomReactionEvents) {
@@ -58,6 +60,7 @@ class CustomReactionPresenter @Inject constructor(
                 is CustomReactionEvents.DismissCustomReactionSheet -> handleDismissCustomReactionSheet()
             }
         }
+
         val event = (target.value as? CustomReactionState.Target.Success)?.event
         val selectedEmoji = event
             ?.reactionsState
@@ -69,7 +72,7 @@ class CustomReactionPresenter @Inject constructor(
             target = target.value,
             selectedEmoji = selectedEmoji,
             eventSink = { handleEvents(it) },
-            searchState = emojiPickerStatePresenter.present(),
+            searchState = searchState,
         )
     }
 }

@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -34,7 +35,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -49,7 +49,7 @@ import io.element.android.libraries.designsystem.text.toSp
 import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.designsystem.theme.components.SearchBar
 import io.element.android.libraries.designsystem.theme.components.SearchBarResultState
-import io.element.android.libraries.designsystem.theme.components.Text
+import io.element.android.libraries.ui.strings.CommonStrings
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentSetOf
@@ -75,56 +75,64 @@ fun EmojiPicker(
             active = state.isSearchActive,
             selectedEmojis = selectedEmojis,
             onActiveChanged = { state.eventSink(EmojiPickerEvents.OnSearchActiveChanged(it)) },
-            onTextChange = { state.eventSink(EmojiPickerEvents.UpdateSearchQuery(it)) },
+            onQueryChange = { state.eventSink(EmojiPickerEvents.UpdateSearchQuery(it)) },
             onEmojiSelected = {
                 state.eventSink(EmojiPickerEvents.OnSearchActiveChanged(false))
                 onEmojiSelected(it)
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
         )
 
-        SecondaryTabRow(
-            selectedTabIndex = pagerState.currentPage,
-        ) {
-            EmojibaseCategory.entries.forEachIndexed { index, category ->
-                Tab(
-                    icon = {
-                        Icon(
-                            imageVector = category.icon,
-                            contentDescription = stringResource(id = category.title)
-                        )
-                    },
-                    selected = pagerState.currentPage == index,
-                    onClick = {
-                        coroutineScope.launch { pagerState.animateScrollToPage(index) }
-                    }
-                )
-            }
-        }
-
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxWidth(),
-        ) { index ->
-            val category = EmojibaseCategory.entries[index]
-            val emojis = categories[category] ?: listOf()
-            LazyVerticalGrid(
-                modifier = Modifier.fillMaxSize(),
-                columns = GridCells.Adaptive(minSize = 48.dp),
-                contentPadding = PaddingValues(vertical = 10.dp, horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+        if (!state.isSearchActive) {
+            SecondaryTabRow(
+                selectedTabIndex = pagerState.currentPage,
             ) {
-                items(emojis, key = { it.unicode }) { item ->
-                    EmojiItem(
-                        modifier = Modifier.aspectRatio(1f),
-                        item = item,
-                        isSelected = selectedEmojis.contains(item.unicode),
-                        onEmojiSelected = onEmojiSelected,
-                        emojiSize = 32.dp.toSp(),
-                    )
+                EmojibaseCategory.entries.forEachIndexed { index, category ->
+                    Tab(icon = {
+                        Icon(
+                            imageVector = category.icon, contentDescription = stringResource(id = category.title)
+                        )
+                    }, selected = pagerState.currentPage == index, onClick = {
+                        coroutineScope.launch { pagerState.animateScrollToPage(index) }
+                    })
                 }
             }
+
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxWidth(),
+            ) { index ->
+                val category = EmojibaseCategory.entries[index]
+                val emojis = categories[category] ?: listOf()
+                EmojiGrid(emojis = emojis, selectedEmojis = selectedEmojis, onEmojiSelected = onEmojiSelected)
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmojiGrid(
+    emojis: List<Emoji>,
+    selectedEmojis: ImmutableSet<String>,
+    onEmojiSelected: (Emoji) -> Unit,
+) {
+    LazyVerticalGrid(
+        modifier = Modifier.fillMaxSize(),
+        columns = GridCells.Adaptive(minSize = 48.dp),
+        contentPadding = PaddingValues(vertical = 10.dp, horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        items(emojis, key = { it.unicode }) { item ->
+            EmojiItem(
+                modifier = Modifier.aspectRatio(1f),
+                item = item,
+                isSelected = selectedEmojis.contains(item.unicode),
+                onEmojiSelected = onEmojiSelected,
+                emojiSize = 32.dp.toSp(),
+            )
         }
     }
 }
@@ -134,38 +142,21 @@ fun EmojiPicker(
 private fun EmojiPickerSearchBar(
     query: String,
     state: SearchBarResultState<ImmutableList<Emoji>>,
-    active: Boolean,
-    selectedEmojis: ImmutableSet<String>,
+    active: Boolean, selectedEmojis: ImmutableSet<String>,
     onActiveChanged: (Boolean) -> Unit,
-    onTextChange: (String) -> Unit,
+    onQueryChange: (String) -> Unit,
     onEmojiSelected: (Emoji) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     SearchBar(
         query = query,
-        onQueryChange = onTextChange,
+        onQueryChange = onQueryChange,
         active = active,
         onActiveChange = onActiveChanged,
-        placeHolderTitle = "Search for emoji",
+        placeHolderTitle = stringResource(CommonStrings.common_search_for_emoji),
         resultState = state,
-        resultHandler = {results ->
-            LazyVerticalGrid(
-                modifier = Modifier.fillMaxSize(),
-                columns = GridCells.Adaptive(minSize = 48.dp),
-                contentPadding = PaddingValues(vertical = 10.dp, horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                items(results, key = { it.unicode }) { item ->
-                    EmojiItem(
-                        modifier = Modifier.aspectRatio(1f),
-                        item = item,
-                        isSelected = selectedEmojis.contains(item.unicode),
-                        onEmojiSelected = onEmojiSelected,
-                        emojiSize = 32.dp.toSp(),
-                    )
-                }
-            }
+        resultHandler = { results ->
+            EmojiGrid(emojis = results, selectedEmojis = selectedEmojis, onEmojiSelected = onEmojiSelected)
         },
         modifier = modifier,
     )
