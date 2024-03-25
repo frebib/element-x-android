@@ -327,7 +327,7 @@ class RustTimeline(
         thumbnailFile: File?,
         imageInfo: ImageInfo,
         body: String?,
-        formattedBody: String?,
+        htmlBody: String?,
         progressCallback: ProgressCallback?,
     ): Result<MediaUploadHandler> {
         return sendAttachment(listOfNotNull(file, thumbnailFile)) {
@@ -336,7 +336,7 @@ class RustTimeline(
                 thumbnailUrl = thumbnailFile?.path,
                 imageInfo = imageInfo.map(),
                 caption = body,
-                formattedCaption = formattedBody?.let {
+                formattedCaption = htmlBody?.let {
                     FormattedBody(body = it, format = MessageFormat.Html)
                 },
                 progressWatcher = progressCallback?.toProgressWatcher()
@@ -349,7 +349,7 @@ class RustTimeline(
         thumbnailFile: File?,
         videoInfo: VideoInfo,
         body: String?,
-        formattedBody: String?,
+        htmlBody: String?,
         progressCallback: ProgressCallback?,
     ): Result<MediaUploadHandler> {
         return sendAttachment(listOfNotNull(file, thumbnailFile)) {
@@ -358,7 +358,7 @@ class RustTimeline(
                 thumbnailUrl = thumbnailFile?.path,
                 videoInfo = videoInfo.map(),
                 caption = body,
-                formattedCaption = formattedBody?.let {
+                formattedCaption = htmlBody?.let {
                     FormattedBody(body = it, format = MessageFormat.Html)
                 },
                 progressWatcher = progressCallback?.toProgressWatcher()
