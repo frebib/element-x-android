@@ -100,7 +100,6 @@ fun Project.setupKover() {
         defaults {
             // add reports of both 'debug' and 'release' Android build variants to default reports
             mergeWith("gplayDebug")
-            mergeWith("gplayRelease")
 
             verify {
                 onCheck = true
@@ -109,11 +108,11 @@ fun Project.setupKover() {
                     isEnabled = true
                     entity = kotlinx.kover.gradle.plugin.dsl.GroupingEntityType.APPLICATION
                     bound {
-                        minValue = 65
+                        minValue = 70
                         // Setting a max value, so that if coverage is bigger, it means that we have to change minValue.
                         // For instance if we have minValue = 20 and maxValue = 30, and current code coverage is now 31.32%, update
                         // minValue to 25 and maxValue to 35.
-                        maxValue = 75
+                        maxValue = 80
                         metric = kotlinx.kover.gradle.plugin.dsl.MetricType.INSTRUCTION
                         aggregation = kotlinx.kover.gradle.plugin.dsl.AggregationType.COVERED_PERCENTAGE
                     }
@@ -203,8 +202,6 @@ fun Project.setupKover() {
                 }
             }
         }
-
-        androidReports("gplayRelease") {}
     }
 }
 

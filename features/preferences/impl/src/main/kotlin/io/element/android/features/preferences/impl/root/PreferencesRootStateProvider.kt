@@ -18,13 +18,15 @@ package io.element.android.features.preferences.impl.root
 
 import io.element.android.features.logout.api.direct.aDirectLogoutState
 import io.element.android.libraries.designsystem.utils.snackbar.SnackbarMessage
+import io.element.android.libraries.matrix.api.user.MatrixUser
 import io.element.android.libraries.ui.strings.CommonStrings
 
-fun aPreferencesRootState() = PreferencesRootState(
-    myUser = null,
+fun aPreferencesRootState(
+    myUser: MatrixUser,
+) = PreferencesRootState(
+    myUser = myUser,
     version = "Version 1.1 (1)",
     deviceId = "ILAKNDNASDLK",
-    showCompleteVerification = true,
     showSecureBackup = true,
     showSecureBackupBadge = true,
     accountManagementUrl = "aUrl",
@@ -33,6 +35,7 @@ fun aPreferencesRootState() = PreferencesRootState(
     showDeveloperSettings = true,
     showNotificationSettings = true,
     showLockScreenSettings = true,
+    showBlockedUsersItem = true,
     snackbarMessage = SnackbarMessage(CommonStrings.common_verification_complete),
     directLogoutState = aDirectLogoutState(),
 )

@@ -34,9 +34,9 @@ anvil {
 }
 
 dependencies {
-    implementation(projects.appconfig)
     implementation(projects.libraries.di)
     implementation(libs.dagger)
+    implementation(projects.libraries.androidutils)
     implementation(projects.libraries.core)
     implementation(libs.serialization.json)
     api(projects.libraries.sessionStorage.api)
@@ -44,7 +44,5 @@ dependencies {
 
     testImplementation(libs.test.junit)
     testImplementation(libs.test.truth)
-    testImplementation(libs.test.robolectric)
-    testImplementation(projects.tests.testutils)
     testImplementation(projects.libraries.matrix.test)
 }

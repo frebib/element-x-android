@@ -51,7 +51,6 @@ import io.element.android.libraries.ui.strings.CommonStrings
 fun PreferencesRootView(
     state: PreferencesRootState,
     onBackPressed: () -> Unit,
-    onVerifyClicked: () -> Unit,
     onSecureBackupClicked: () -> Unit,
     onManageAccountClicked: (url: String) -> Unit,
     onOpenAnalytics: () -> Unit,
@@ -77,17 +76,10 @@ fun PreferencesRootView(
     ) {
         UserPreferences(
             modifier = Modifier.clickable {
-                state.myUser?.let(onOpenUserProfile)
+                onOpenUserProfile(state.myUser)
             },
             user = state.myUser,
         )
-        if (state.showCompleteVerification) {
-            ListItem(
-                headlineContent = { Text(text = stringResource(CommonStrings.common_verify_device)) },
-                leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.CheckCircle())),
-                onClick = onVerifyClicked
-            )
-        }
         if (state.showSecureBackup) {
             ListItem(
                 headlineContent = { Text(stringResource(id = CommonStrings.common_chat_backup)) },
@@ -95,8 +87,6 @@ fun PreferencesRootView(
                 trailingContent = ListItemContent.Badge.takeIf { state.showSecureBackupBadge },
                 onClick = onSecureBackupClicked,
             )
-        }
-        if (state.showCompleteVerification || state.showSecureBackup) {
             HorizontalDivider()
         }
         if (state.accountManagementUrl != null) {
@@ -122,11 +112,13 @@ fun PreferencesRootView(
                 onClick = onOpenNotificationSettings,
             )
         }
-        ListItem(
-            headlineContent = { Text(stringResource(id = CommonStrings.common_blocked_users)) },
-            leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Block())),
-            onClick = onOpenBlockedUsers,
-        )
+        if (state.showBlockedUsersItem) {
+            ListItem(
+                headlineContent = { Text(stringResource(id = CommonStrings.common_blocked_users)) },
+                leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.Block())),
+                onClick = onOpenBlockedUsers,
+            )
+        }
         ListItem(
             headlineContent = { Text(stringResource(id = CommonStrings.common_report_a_problem)) },
             leadingContent = ListItemContent.Icon(IconSource.Vector(CompoundIcons.ChatProblem())),
@@ -223,14 +215,13 @@ internal fun PreferencesRootViewDarkPreview(@PreviewParameter(MatrixUserProvider
 @Composable
 private fun ContentToPreview(matrixUser: MatrixUser) {
     PreferencesRootView(
-        state = aPreferencesRootState().copy(myUser = matrixUser),
+        state = aPreferencesRootState(myUser = matrixUser),
         onBackPressed = {},
         onOpenAnalytics = {},
         onOpenRageShake = {},
         onOpenDeveloperSettings = {},
         onOpenAdvancedSettings = {},
         onOpenAbout = {},
-        onVerifyClicked = {},
         onSecureBackupClicked = {},
         onManageAccountClicked = {},
         onOpenNotificationSettings = {},

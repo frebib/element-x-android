@@ -51,6 +51,7 @@ import io.element.android.libraries.matrix.api.timeline.item.event.VideoMessageT
 import io.element.android.libraries.matrix.api.timeline.item.event.VoiceMessageType
 import io.element.android.libraries.matrix.test.A_USER_ID
 import io.element.android.libraries.matrix.test.FakeMatrixClient
+import io.element.android.libraries.matrix.test.permalink.FakePermalinkParser
 import io.element.android.libraries.matrix.test.timeline.aPollContent
 import io.element.android.libraries.matrix.test.timeline.aProfileChangeMessageContent
 import io.element.android.libraries.matrix.test.timeline.anEventTimelineItem
@@ -78,7 +79,8 @@ class DefaultRoomLastMessageFormatterTest {
             sp = AndroidStringProvider(context.resources),
             roomMembershipContentFormatter = RoomMembershipContentFormatter(fakeMatrixClient, stringProvider),
             profileChangeContentFormatter = ProfileChangeContentFormatter(stringProvider),
-            stateContentFormatter = StateContentFormatter(stringProvider)
+            stateContentFormatter = StateContentFormatter(stringProvider),
+            permalinkParser = FakePermalinkParser(),
         )
     }
 
@@ -161,10 +163,10 @@ class DefaultRoomLastMessageFormatterTest {
 
         val sharedContentMessagesTypes = arrayOf(
             TextMessageType(body, null),
-            VideoMessageType(body, MediaSource("url"), null),
+            VideoMessageType(body, null, null, MediaSource("url"), null),
             AudioMessageType(body, MediaSource("url"), null),
             VoiceMessageType(body, MediaSource("url"), null, null),
-            ImageMessageType(body, MediaSource("url"), null),
+            ImageMessageType(body, null, null, MediaSource("url"), null),
             StickerMessageType(body, MediaSource("url"), null),
             FileMessageType(body, MediaSource("url"), null),
             LocationMessageType(body, "geo:1,2", null),
@@ -650,7 +652,7 @@ class DefaultRoomLastMessageFormatterTest {
             OtherState.RoomHistoryVisibility,
             OtherState.RoomJoinRules,
             OtherState.RoomPinnedEvents,
-            OtherState.RoomPowerLevels(emptyMap()),
+            OtherState.RoomUserPowerLevels(emptyMap()),
             OtherState.RoomServerAcl,
             OtherState.RoomTombstone,
             OtherState.SpaceChild,
@@ -733,7 +735,7 @@ class DefaultRoomLastMessageFormatterTest {
 
         val someoneChangedDisplayNameEvent = createRoomEvent(sentByYou = false, senderDisplayName = otherName, content = changedContent)
         val someoneChangedDisplayName = formatter.format(someoneChangedDisplayNameEvent, false)
-        assertThat(someoneChangedDisplayName).isEqualTo("$otherName changed their display name from $oldDisplayName to $newDisplayName")
+        assertThat(someoneChangedDisplayName).isEqualTo("$someoneElseId changed their display name from $oldDisplayName to $newDisplayName")
 
         val youSetDisplayNameEvent = createRoomEvent(sentByYou = true, senderDisplayName = null, content = setContent)
         val youSetDisplayName = formatter.format(youSetDisplayNameEvent, false)
@@ -741,7 +743,7 @@ class DefaultRoomLastMessageFormatterTest {
 
         val someoneSetDisplayNameEvent = createRoomEvent(sentByYou = false, senderDisplayName = otherName, content = setContent)
         val someoneSetDisplayName = formatter.format(someoneSetDisplayNameEvent, false)
-        assertThat(someoneSetDisplayName).isEqualTo("$otherName set their display name to $newDisplayName")
+        assertThat(someoneSetDisplayName).isEqualTo("$someoneElseId set their display name to $newDisplayName")
 
         val youRemovedDisplayNameEvent = createRoomEvent(sentByYou = true, senderDisplayName = null, content = removedContent)
         val youRemovedDisplayName = formatter.format(youRemovedDisplayNameEvent, false)
@@ -749,7 +751,7 @@ class DefaultRoomLastMessageFormatterTest {
 
         val someoneRemovedDisplayNameEvent = createRoomEvent(sentByYou = false, senderDisplayName = otherName, content = removedContent)
         val someoneRemovedDisplayName = formatter.format(someoneRemovedDisplayNameEvent, false)
-        assertThat(someoneRemovedDisplayName).isEqualTo("$otherName removed their display name (it was $oldDisplayName)")
+        assertThat(someoneRemovedDisplayName).isEqualTo("$someoneElseId removed their display name (it was $oldDisplayName)")
 
         val unchangedEvent = createRoomEvent(sentByYou = true, senderDisplayName = otherName, content = sameContent)
         val unchangedResult = formatter.format(unchangedEvent, false)
@@ -828,7 +830,7 @@ class DefaultRoomLastMessageFormatterTest {
     // endregion
 
     private fun createRoomEvent(sentByYou: Boolean, senderDisplayName: String?, content: EventContent): EventTimelineItem {
-        val sender = if (sentByYou) A_USER_ID else UserId("@someone_else:domain")
+        val sender = if (sentByYou) A_USER_ID else someoneElseId
         val profile = ProfileTimelineDetails.Ready(senderDisplayName, false, null)
         return anEventTimelineItem(
             content = content,
@@ -837,4 +839,6 @@ class DefaultRoomLastMessageFormatterTest {
             isOwn = sentByYou,
         )
     }
+
+    private val someoneElseId = UserId("@someone_else:domain")
 }

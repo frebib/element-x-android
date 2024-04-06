@@ -25,6 +25,7 @@ import com.squareup.anvil.annotations.ContributesBinding
 import io.element.android.libraries.di.SessionScope
 import io.element.android.libraries.eventformatter.api.RoomLastMessageFormatter
 import io.element.android.libraries.eventformatter.impl.mode.RenderingMode
+import io.element.android.libraries.matrix.api.permalink.PermalinkParser
 import io.element.android.libraries.matrix.api.timeline.item.event.AudioMessageType
 import io.element.android.libraries.matrix.api.timeline.item.event.EmoteMessageType
 import io.element.android.libraries.matrix.api.timeline.item.event.EventTimelineItem
@@ -32,6 +33,7 @@ import io.element.android.libraries.matrix.api.timeline.item.event.FailedToParse
 import io.element.android.libraries.matrix.api.timeline.item.event.FailedToParseStateContent
 import io.element.android.libraries.matrix.api.timeline.item.event.FileMessageType
 import io.element.android.libraries.matrix.api.timeline.item.event.ImageMessageType
+import io.element.android.libraries.matrix.api.timeline.item.event.LegacyCallInviteContent
 import io.element.android.libraries.matrix.api.timeline.item.event.LocationMessageType
 import io.element.android.libraries.matrix.api.timeline.item.event.MessageContent
 import io.element.android.libraries.matrix.api.timeline.item.event.MessageType
@@ -61,6 +63,7 @@ class DefaultRoomLastMessageFormatter @Inject constructor(
     private val roomMembershipContentFormatter: RoomMembershipContentFormatter,
     private val profileChangeContentFormatter: ProfileChangeContentFormatter,
     private val stateContentFormatter: StateContentFormatter,
+    private val permalinkParser: PermalinkParser
 ) : RoomLastMessageFormatter {
     companion object {
         // Max characters to display in the last message. This works around https://github.com/element-hq/element-x-android/issues/2105
@@ -97,7 +100,7 @@ class DefaultRoomLastMessageFormatter @Inject constructor(
                 roomMembershipContentFormatter.format(content, senderDisplayName, isOutgoing)
             }
             is ProfileChangeContent -> {
-                profileChangeContentFormatter.format(content, senderDisplayName, isOutgoing)
+                profileChangeContentFormatter.format(content, event.sender, senderDisplayName, isOutgoing)
             }
             is StateContent -> {
                 stateContentFormatter.format(content, senderDisplayName, isOutgoing, RenderingMode.RoomList)
@@ -109,6 +112,7 @@ class DefaultRoomLastMessageFormatter @Inject constructor(
             is FailedToParseMessageLikeContent, is FailedToParseStateContent, is UnknownContent -> {
                 prefixIfNeeded(sp.getString(CommonStrings.common_unsupported_event), senderDisplayName, isDmRoom)
             }
+            is LegacyCallInviteContent -> sp.getString(CommonStrings.common_call_invite)
         }?.take(MAX_SAFE_LENGTH)
     }
 
@@ -119,7 +123,7 @@ class DefaultRoomLastMessageFormatter @Inject constructor(
                 return "* $senderDisplayName ${messageType.body}"
             }
             is TextMessageType -> {
-                messageType.toPlainText()
+                messageType.toPlainText(permalinkParser)
             }
             is VideoMessageType -> {
                 sp.getString(CommonStrings.common_video)

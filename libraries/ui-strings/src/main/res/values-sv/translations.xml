@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="a11y_delete">"Radera"</string>
   <string name="a11y_hide_password">"Dölj lösenord"</string>
   <string name="a11y_notifications_mentions_only">"Endast omnämningar"</string>
   <string name="a11y_notifications_muted">"Tystad"</string>
+  <string name="a11y_pause">"Pausa"</string>
+  <string name="a11y_play">"Spela upp"</string>
   <string name="a11y_poll">"Omröstning"</string>
   <string name="a11y_poll_end">"Avslutade omröstning"</string>
   <string name="a11y_send_files">"Skicka filer"</string>
   <string name="a11y_show_password">"Visa lösenord"</string>
   <string name="a11y_user_menu">"Användarmeny"</string>
+  <string name="a11y_voice_message_record">"Spela in röstmeddelande."</string>
   <string name="action_accept">"Godkänn"</string>
   <string name="action_add_to_timeline">"Lägg till i tidslinjen"</string>
   <string name="action_back">"Tillbaka"</string>
@@ -65,6 +69,9 @@
   <string name="action_send_message">"Skicka meddelande"</string>
   <string name="action_share">"Dela"</string>
   <string name="action_share_link">"Dela länk"</string>
+  <string name="action_sign_in_again">"Logga in igen"</string>
+  <string name="action_signout">"Logga ut"</string>
+  <string name="action_signout_anyway">"Logga ut ändå"</string>
   <string name="action_skip">"Hoppa över"</string>
   <string name="action_start">"Starta"</string>
   <string name="action_start_chat">"Starta chat"</string>
@@ -79,6 +86,7 @@
   <string name="common_analytics">"Analysdata"</string>
   <string name="common_audio">"Ljud"</string>
   <string name="common_bubbles">"Bubblor"</string>
+  <string name="common_chat_backup">"Chattsäkerhetskopia"</string>
   <string name="common_copyright">"Upphovsrätt"</string>
   <string name="common_creating_room">"Skapar rum …"</string>
   <string name="common_current_user_left_room">"Lämnade rummet"</string>
@@ -89,6 +97,7 @@
   <string name="common_emote">"* %1$s %2$s"</string>
   <string name="common_encryption_enabled">"Kryptering aktiverad"</string>
   <string name="common_error">"Fel"</string>
+  <string name="common_everyone">"Alla"</string>
   <string name="common_file">"Fil"</string>
   <string name="common_file_saved_on_disk_android">"Fil sparad i Download"</string>
   <string name="common_forward_message">"Vidarebefordra meddelande"</string>
@@ -126,6 +135,7 @@
   <string name="common_privacy_policy">"Integritetspolicy"</string>
   <string name="common_reaction">"Reaktion"</string>
   <string name="common_reactions">"Reaktioner"</string>
+  <string name="common_recovery_key">"Återställningsnyckel"</string>
   <string name="common_refreshing">"Uppdaterar …"</string>
   <string name="common_replying_to">"Svarar till %1$s"</string>
   <string name="common_report_a_bug">"Rapportera en bugg"</string>
@@ -160,6 +170,7 @@
   <string name="common_verification_cancelled">"Verifiering avbruten"</string>
   <string name="common_verification_complete">"Verifieringen slutförd"</string>
   <string name="common_video">"Video"</string>
+  <string name="common_voice_message">"Röstmeddelande"</string>
   <string name="common_waiting">"Väntar …"</string>
   <string name="dialog_title_confirmation">"Bekräftelse"</string>
   <string name="dialog_title_error">"Fel"</string>
@@ -171,6 +182,7 @@
   <string name="error_failed_locating_user">"%1$s kunde inte komma åt din plats. Vänligen försök igen senare."</string>
   <string name="error_missing_location_auth_android">"%1$s är inte behörig att komma åt din plats. Du kan aktivera åtkomst i Inställningar."</string>
   <string name="error_missing_location_rationale_android">"%1$s är inte behörig att komma åt din plats. Aktivera åtkomst nedan."</string>
+  <string name="error_missing_microphone_voice_rationale_android">"%1$s är inte behörig att komma åt din mikrofon. Aktivera åtkomst för att spela in ett röstmeddelande."</string>
   <string name="error_some_messages_have_not_been_sent">"Vissa meddelanden har inte skickats"</string>
   <string name="error_unknown">"Tyvärr, ett fel uppstod"</string>
   <string name="invite_friends_rich_title">"🔐️ Häng med mig på %1$s"</string>
@@ -180,6 +192,14 @@
   <string name="screen_media_picker_error_failed_selection">"Misslyckades att välja media, vänligen pröva igen."</string>
   <string name="screen_media_upload_preview_error_failed_processing">"Misslyckades att bearbeta media för uppladdning, vänligen pröva igen."</string>
   <string name="screen_media_upload_preview_error_failed_sending">"Misslyckades att ladda upp media, vänligen pröva igen."</string>
+  <string name="screen_room_error_failed_processing_media">"Misslyckades att bearbeta media för uppladdning, vänligen pröva igen."</string>
+  <string name="screen_room_error_failed_retrieving_user_details">"Kunde inte hämta användarinformation"</string>
+  <string name="screen_room_member_details_block_alert_action">"Blockera"</string>
+  <string name="screen_room_member_details_block_alert_description">"Blockerade användare kommer inte att kunna skicka meddelanden till dig och alla deras meddelanden kommer att döljas. Du kan avblockera dem när som helst."</string>
+  <string name="screen_room_member_details_block_user">"Blockera användare"</string>
+  <string name="screen_room_member_details_unblock_alert_action">"Avblockera"</string>
+  <string name="screen_room_member_details_unblock_alert_description">"Du kommer att kunna se alla meddelanden från dem igen."</string>
+  <string name="screen_room_member_details_unblock_user">"Avblockera användare"</string>
   <string name="screen_share_location_title">"Dela plats"</string>
   <string name="screen_share_my_location_action">"Dela min plats"</string>
   <string name="screen_share_open_apple_maps">"Öppna i Apple Maps"</string>

@@ -29,6 +29,7 @@ import io.element.android.features.roomlist.impl.datasource.DefaultInviteStateDa
 import io.element.android.features.roomlist.impl.datasource.RoomListDataSource
 import io.element.android.features.roomlist.impl.datasource.RoomListRoomSummaryFactory
 import io.element.android.features.roomlist.impl.filters.RoomListFiltersPresenter
+import io.element.android.features.roomlist.impl.filters.selection.DefaultFilterSelectionStrategy
 import io.element.android.features.roomlist.impl.migration.MigrationScreenPresenter
 import io.element.android.features.roomlist.impl.migration.SharedPrefsMigrationScreenStore
 import io.element.android.features.roomlist.impl.search.RoomListSearchDataSource
@@ -88,6 +89,7 @@ class RoomListScreen(
             ),
             profileChangeContentFormatter = ProfileChangeContentFormatter(stringProvider),
             stateContentFormatter = StateContentFormatter(stringProvider),
+            permalinkParser = OnlyFallbackPermalinkParser(),
         ),
     )
     private val presenter = RoomListPresenter(
@@ -117,7 +119,8 @@ class RoomListScreen(
                 roomListService = matrixClient.roomListService,
                 roomSummaryFactory = roomListRoomSummaryFactory,
                 coroutineDispatchers = coroutineDispatchers,
-            )
+            ),
+            featureFlagService = featureFlagService,
         ),
         sessionPreferencesStore = DefaultSessionPreferencesStore(
             context = context,
@@ -127,6 +130,7 @@ class RoomListScreen(
         filtersPresenter = RoomListFiltersPresenter(
             roomListService = matrixClient.roomListService,
             featureFlagService = featureFlagService,
+            filterSelectionStrategy = DefaultFilterSelectionStrategy(),
         ),
         analyticsService = NoopAnalyticsService(),
     )
@@ -148,12 +152,12 @@ class RoomListScreen(
             state = state,
             onRoomClicked = ::onRoomClicked,
             onSettingsClicked = {},
-            onVerifyClicked = {},
             onConfirmRecoveryKeyClicked = {},
             onCreateRoomClicked = {},
             onInvitesClicked = {},
             onRoomSettingsClicked = {},
             onMenuActionClicked = {},
+            onRoomDirectorySearchClicked = {},
             modifier = modifier,
         )
 

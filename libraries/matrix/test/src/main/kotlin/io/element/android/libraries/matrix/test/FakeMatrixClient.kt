@@ -30,6 +30,7 @@ import io.element.android.libraries.matrix.api.oidc.AccountManagementAction
 import io.element.android.libraries.matrix.api.pusher.PushersService
 import io.element.android.libraries.matrix.api.room.MatrixRoom
 import io.element.android.libraries.matrix.api.room.RoomMembershipObserver
+import io.element.android.libraries.matrix.api.roomdirectory.RoomDirectoryService
 import io.element.android.libraries.matrix.api.roomlist.RoomListService
 import io.element.android.libraries.matrix.api.user.MatrixSearchUserResults
 import io.element.android.libraries.matrix.api.user.MatrixUser
@@ -39,6 +40,7 @@ import io.element.android.libraries.matrix.test.media.FakeMediaLoader
 import io.element.android.libraries.matrix.test.notification.FakeNotificationService
 import io.element.android.libraries.matrix.test.notificationsettings.FakeNotificationSettingsService
 import io.element.android.libraries.matrix.test.pushers.FakePushersService
+import io.element.android.libraries.matrix.test.roomdirectory.FakeRoomDirectoryService
 import io.element.android.libraries.matrix.test.roomlist.FakeRoomListService
 import io.element.android.libraries.matrix.test.sync.FakeSyncService
 import io.element.android.libraries.matrix.test.verification.FakeSessionVerificationService
@@ -48,14 +50,15 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.TestScope
 
 class FakeMatrixClient(
     override val sessionId: SessionId = A_SESSION_ID,
     override val deviceId: String = "A_DEVICE_ID",
     override val sessionCoroutineScope: CoroutineScope = TestScope(),
-    private val userDisplayName: Result<String> = Result.success(A_USER_NAME),
-    private val userAvatarUrl: Result<String> = Result.success(AN_AVATAR_URL),
+    private val userDisplayName: String? = A_USER_NAME,
+    private val userAvatarUrl: String? = AN_AVATAR_URL,
     override val roomListService: RoomListService = FakeRoomListService(),
     override val mediaLoader: MatrixMediaLoader = FakeMediaLoader(),
     private val sessionVerificationService: FakeSessionVerificationService = FakeSessionVerificationService(),
@@ -64,6 +67,7 @@ class FakeMatrixClient(
     private val notificationSettingsService: FakeNotificationSettingsService = FakeNotificationSettingsService(),
     private val syncService: FakeSyncService = FakeSyncService(),
     private val encryptionService: FakeEncryptionService = FakeEncryptionService(),
+    private val roomDirectoryService: RoomDirectoryService = FakeRoomDirectoryService(),
     private val accountManagementUrlString: Result<String?> = Result.success(null),
 ) : MatrixClient {
     var setDisplayNameCalled: Boolean = false
@@ -73,6 +77,8 @@ class FakeMatrixClient(
     var removeAvatarCalled: Boolean = false
         private set
 
+    private val _userProfile: MutableStateFlow<MatrixUser> = MutableStateFlow(MatrixUser(sessionId, userDisplayName, userAvatarUrl))
+    override val userProfile: StateFlow<MatrixUser> = _userProfile
     override val ignoredUsersFlow: MutableStateFlow<ImmutableList<UserId>> = MutableStateFlow(persistentListOf())
 
     private var ignoreUserResult: Result<Unit> = Result.success(Unit)
@@ -88,6 +94,9 @@ class FakeMatrixClient(
     private var setDisplayNameResult: Result<Unit> = Result.success(Unit)
     private var uploadAvatarResult: Result<Unit> = Result.success(Unit)
     private var removeAvatarResult: Result<Unit> = Result.success(Unit)
+    var joinRoomLambda: suspend (RoomId) -> Result<RoomId> = {
+        Result.success(it)
+    }
 
     override suspend fun getRoom(roomId: RoomId): MatrixRoom? {
         return getRoomResults[roomId]
@@ -123,6 +132,8 @@ class FakeMatrixClient(
 
     override fun syncService() = syncService
 
+    override fun roomDirectoryService() = roomDirectoryService
+
     override suspend fun getCacheSize(): Long {
         return 0
     }
@@ -140,12 +151,10 @@ class FakeMatrixClient(
 
     override fun close() = Unit
 
-    override suspend fun loadUserDisplayName(): Result<String> {
-        return userDisplayName
-    }
-
-    override suspend fun loadUserAvatarUrl(): Result<String?> {
-        return userAvatarUrl
+    override suspend fun getUserProfile(): Result<MatrixUser> = simulateLongTask {
+        val result = getProfileResults[sessionId]?.getOrNull() ?: MatrixUser(sessionId, userDisplayName, userAvatarUrl)
+        _userProfile.tryEmit(result)
+        return Result.success(result)
     }
 
     override suspend fun getAccountManagementUrl(action: AccountManagementAction?): Result<String?> {
@@ -174,6 +183,8 @@ class FakeMatrixClient(
         removeAvatarCalled = true
         return removeAvatarResult
     }
+
+    override suspend fun joinRoom(roomId: RoomId): Result<RoomId> = joinRoomLambda(roomId)
 
     override fun sessionVerificationService(): SessionVerificationService = sessionVerificationService
 

@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import io.element.android.features.messages.impl.actionlist.model.TimelineItemAction
 import io.element.android.features.messages.impl.timeline.model.TimelineItem
+import io.element.android.features.messages.impl.timeline.model.event.TimelineItemLegacyCallInviteContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemPollContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemRedactedContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemStateContent
@@ -95,6 +96,7 @@ class ActionListPresenter @Inject constructor(
                 is TimelineItemStateContent -> {
                     buildList {
                         add(TimelineItemAction.Copy)
+                        add(TimelineItemAction.CopyLink)
                         if (isDeveloperModeEnabled) {
                             add(TimelineItemAction.ViewSource)
                         }
@@ -118,6 +120,7 @@ class ActionListPresenter @Inject constructor(
                         if (timelineItem.content.canBeCopied()) {
                             add(TimelineItemAction.Copy)
                         }
+                        add(TimelineItemAction.CopyLink)
                         if (isDeveloperModeEnabled) {
                             add(TimelineItemAction.ViewSource)
                         }
@@ -135,6 +138,7 @@ class ActionListPresenter @Inject constructor(
                             add(TimelineItemAction.Reply)
                             add(TimelineItemAction.Forward)
                         }
+                        add(TimelineItemAction.CopyLink)
                         if (isDeveloperModeEnabled) {
                             add(TimelineItemAction.ViewSource)
                         }
@@ -143,6 +147,13 @@ class ActionListPresenter @Inject constructor(
                         }
                         if (canRedact) {
                             add(TimelineItemAction.Redact)
+                        }
+                    }
+                }
+                is TimelineItemLegacyCallInviteContent -> {
+                    buildList {
+                        if (isDeveloperModeEnabled) {
+                            add(TimelineItemAction.ViewSource)
                         }
                     }
                 }
@@ -168,6 +179,7 @@ class ActionListPresenter @Inject constructor(
                     if (timelineItem.content.canBeCopied()) {
                         add(TimelineItemAction.Copy)
                     }
+                    add(TimelineItemAction.CopyLink)
                     if (isDeveloperModeEnabled) {
                         add(TimelineItemAction.ViewSource)
                     }

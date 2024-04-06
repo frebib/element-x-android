@@ -63,6 +63,8 @@ import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.core.TransactionId
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.media.MediaSource
+import io.element.android.libraries.matrix.api.permalink.PermalinkData
+import io.element.android.libraries.matrix.api.permalink.PermalinkParser
 import io.element.android.libraries.matrix.ui.components.A_BLUR_HASH
 import io.element.android.libraries.matrix.ui.components.AttachmentThumbnail
 import io.element.android.libraries.matrix.ui.components.AttachmentThumbnailInfo
@@ -98,6 +100,7 @@ import kotlin.time.Duration.Companion.seconds
 fun TextComposer(
     state: RichTextEditorState,
     voiceMessageState: VoiceMessageState,
+    permalinkParser: PermalinkParser,
     composerMode: MessageComposerMode,
     enableTextFormatting: Boolean,
     enableVoiceMessages: Boolean,
@@ -152,7 +155,10 @@ fun TextComposer(
 
     val textInput: @Composable () -> Unit = remember(state, subcomposing, composerMode, onResetComposerMode, onError) {
         @Composable {
-            val mentionSpanProvider = rememberMentionSpanProvider(currentUserId)
+            val mentionSpanProvider = rememberMentionSpanProvider(
+                currentUserId = currentUserId,
+                permalinkParser = permalinkParser,
+            )
             TextInput(
                 state = state,
                 subcomposing = subcomposing,
@@ -172,7 +178,7 @@ fun TextComposer(
         }
     }
 
-    val canSendMessage by remember { derivedStateOf { state.messageHtml.isNotEmpty() } }
+    val canSendMessage by remember { derivedStateOf { state.messageMarkdown.isNotBlank() } }
     val sendButton = @Composable {
         SendButton(
             canSendMessage = canSendMessage,
@@ -598,7 +604,7 @@ internal fun TextComposerSimplePreview() = ElementPreview {
         items = persistentListOf(
             {
                 ATextComposer(
-                    RichTextEditorState("", initialFocus = true),
+                    aRichTextEditorState(initialText = "", initialFocus = true),
                     voiceMessageState = VoiceMessageState.Idle,
                     composerMode = MessageComposerMode.Normal,
                     enableTextFormatting = true,
@@ -608,7 +614,7 @@ internal fun TextComposerSimplePreview() = ElementPreview {
             },
             {
                 ATextComposer(
-                    RichTextEditorState("A message", initialFocus = true),
+                    aRichTextEditorState(initialText = "A message", initialFocus = true),
                     voiceMessageState = VoiceMessageState.Idle,
                     composerMode = MessageComposerMode.Normal,
                     enableTextFormatting = true,
@@ -618,8 +624,8 @@ internal fun TextComposerSimplePreview() = ElementPreview {
             },
             {
                 ATextComposer(
-                    RichTextEditorState(
-                        "A message\nWith several lines\nTo preview larger textfields and long lines with overflow",
+                    aRichTextEditorState(
+                        initialText = "A message\nWith several lines\nTo preview larger textfields and long lines with overflow",
                         initialFocus = true
                     ),
                     voiceMessageState = VoiceMessageState.Idle,
@@ -631,7 +637,7 @@ internal fun TextComposerSimplePreview() = ElementPreview {
             },
             {
                 ATextComposer(
-                    RichTextEditorState("A message without focus", initialFocus = false),
+                    aRichTextEditorState(initialText = "A message without focus", initialFocus = false),
                     voiceMessageState = VoiceMessageState.Idle,
                     composerMode = MessageComposerMode.Normal,
                     enableTextFormatting = true,
@@ -648,7 +654,7 @@ internal fun TextComposerSimplePreview() = ElementPreview {
 internal fun TextComposerFormattingPreview() = ElementPreview {
     PreviewColumn(items = persistentListOf({
         ATextComposer(
-            RichTextEditorState("", initialFocus = false),
+            aRichTextEditorState(initialText = "", initialFocus = false),
             voiceMessageState = VoiceMessageState.Idle,
             showTextFormatting = true,
             composerMode = MessageComposerMode.Normal,
@@ -658,7 +664,7 @@ internal fun TextComposerFormattingPreview() = ElementPreview {
         )
     }, {
         ATextComposer(
-            RichTextEditorState("A message", initialFocus = false),
+            aRichTextEditorState(initialText = "A message", initialFocus = false),
             voiceMessageState = VoiceMessageState.Idle,
             showTextFormatting = true,
             composerMode = MessageComposerMode.Normal,
@@ -668,7 +674,10 @@ internal fun TextComposerFormattingPreview() = ElementPreview {
         )
     }, {
         ATextComposer(
-            RichTextEditorState("A message\nWith several lines\nTo preview larger textfields and long lines with overflow", initialFocus = false),
+            aRichTextEditorState(
+                initialText = "A message\nWith several lines\nTo preview larger textfields and long lines with overflow",
+                initialFocus = false
+            ),
             voiceMessageState = VoiceMessageState.Idle,
             showTextFormatting = true,
             composerMode = MessageComposerMode.Normal,
@@ -684,7 +693,7 @@ internal fun TextComposerFormattingPreview() = ElementPreview {
 internal fun TextComposerEditPreview() = ElementPreview {
     PreviewColumn(items = persistentListOf({
         ATextComposer(
-            RichTextEditorState("A message", initialFocus = true),
+            aRichTextEditorState(initialText = "A message", initialFocus = true),
             voiceMessageState = VoiceMessageState.Idle,
             composerMode = MessageComposerMode.Edit(EventId("$1234"), "Some text", TransactionId("1234")),
             enableTextFormatting = true,
@@ -701,7 +710,7 @@ internal fun TextComposerReplyPreview() = ElementPreview {
         items = persistentListOf(
             {
                 ATextComposer(
-                    RichTextEditorState(""),
+                    aRichTextEditorState(""),
                     voiceMessageState = VoiceMessageState.Idle,
                     composerMode = MessageComposerMode.Reply(
                         isThreaded = false,
@@ -737,7 +746,7 @@ internal fun TextComposerReplyPreview() = ElementPreview {
             },
             {
                 ATextComposer(
-                    RichTextEditorState("A message"),
+                    aRichTextEditorState(initialText = "A message"),
                     voiceMessageState = VoiceMessageState.Idle,
                     composerMode = MessageComposerMode.Reply(
                         isThreaded = true,
@@ -758,7 +767,7 @@ internal fun TextComposerReplyPreview() = ElementPreview {
             },
             {
                 ATextComposer(
-                    RichTextEditorState("A message"),
+                    aRichTextEditorState(initialText = "A message"),
                     voiceMessageState = VoiceMessageState.Idle,
                     composerMode = MessageComposerMode.Reply(
                         isThreaded = false,
@@ -779,7 +788,7 @@ internal fun TextComposerReplyPreview() = ElementPreview {
             },
             {
                 ATextComposer(
-                    RichTextEditorState("A message"),
+                    aRichTextEditorState(initialText = "A message"),
                     voiceMessageState = VoiceMessageState.Idle,
                     composerMode = MessageComposerMode.Reply(
                         isThreaded = false,
@@ -800,7 +809,7 @@ internal fun TextComposerReplyPreview() = ElementPreview {
             },
             {
                 ATextComposer(
-                    RichTextEditorState("A message", initialFocus = true),
+                    aRichTextEditorState(initialText = "A message", initialFocus = true),
                     voiceMessageState = VoiceMessageState.Idle,
                     composerMode = MessageComposerMode.Reply(
                         isThreaded = false,
@@ -904,6 +913,10 @@ private fun ATextComposer(
         state = richTextEditorState,
         showTextFormatting = showTextFormatting,
         voiceMessageState = voiceMessageState,
+        permalinkParser = object : PermalinkParser {
+            override fun parse(uriString: String): PermalinkData = TODO("Not yet implemented")
+            override fun parse(uri: Uri): PermalinkData = TODO("Not yet implemented")
+        },
         composerMode = composerMode,
         enableTextFormatting = enableTextFormatting,
         enableVoiceMessages = enableVoiceMessages,
@@ -923,3 +936,14 @@ private fun ATextComposer(
         onRichContentSelected = null,
     )
 }
+
+fun aRichTextEditorState(
+    initialText: String = "",
+    initialHtml: String = initialText,
+    initialMarkdown: String = initialText,
+    initialFocus: Boolean = false,
+) = RichTextEditorState(
+    initialHtml = initialHtml,
+    initialMarkdown = initialMarkdown,
+    initialFocus = initialFocus,
+)

@@ -50,8 +50,17 @@ img {
   display: block;
 }
 
+.missing {
+    text-align: center;
+}
+
 th {
     background: #0DBD8B;
+}
+
+br {
+   display: block;
+   margin: 4px 0;
 }
 
 #form_container {
@@ -75,8 +84,13 @@ input {
 }
 
 #screenshots_container {
-    margin-top: 80px;
-    margin-bottom: 56px;
+    overflow: scroll;
+    position: absolute;
+    top: 64px;
+    bottom: 40px;
+    width: 100%;
+    padding-top: 16px;
+    padding-bottom: 16px;
 }
 
 .screenshot {

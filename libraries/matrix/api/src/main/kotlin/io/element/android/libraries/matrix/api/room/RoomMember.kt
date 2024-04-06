@@ -17,6 +17,7 @@
 package io.element.android.libraries.matrix.api.room
 
 import io.element.android.libraries.matrix.api.core.UserId
+import io.element.android.libraries.matrix.api.user.MatrixUser
 
 data class RoomMember(
     val userId: UserId,
@@ -32,10 +33,20 @@ data class RoomMember(
     /**
      * Role of the RoomMember, based on its [powerLevel].
      */
-    enum class Role {
-        ADMIN,
-        MODERATOR,
-        USER
+    enum class Role(val powerLevel: Long) {
+        ADMIN(100L),
+        MODERATOR(50L),
+        USER(0L);
+
+        companion object {
+            fun forPowerLevel(powerLevel: Long): Role {
+                return when {
+                    powerLevel >= ADMIN.powerLevel -> ADMIN
+                    powerLevel >= MODERATOR.powerLevel -> MODERATOR
+                    else -> USER
+                }
+            }
+        }
     }
 
     /**
@@ -56,7 +67,9 @@ enum class RoomMembershipState {
     INVITE,
     JOIN,
     KNOCK,
-    LEAVE
+    LEAVE;
+
+    fun isActive(): Boolean = this == JOIN || this == INVITE
 }
 
 /**
@@ -66,3 +79,9 @@ enum class RoomMembershipState {
 fun RoomMember.getBestName(): String {
     return displayName?.takeIf { it.isNotEmpty() } ?: userId.value
 }
+
+fun RoomMember.toMatrixUser() = MatrixUser(
+    userId = userId,
+    displayName = displayName,
+    avatarUrl = avatarUrl,
+)

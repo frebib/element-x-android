@@ -41,6 +41,7 @@ import io.element.android.libraries.core.mimetype.MimeTypes
 import io.element.android.libraries.featureflag.api.FeatureFlagService
 import io.element.android.libraries.featureflag.api.FeatureFlags
 import io.element.android.libraries.matrix.api.core.EventId
+import io.element.android.libraries.matrix.api.permalink.PermalinkParser
 import io.element.android.libraries.matrix.api.timeline.item.event.AudioMessageType
 import io.element.android.libraries.matrix.api.timeline.item.event.EmoteMessageType
 import io.element.android.libraries.matrix.api.timeline.item.event.FileMessageType
@@ -67,6 +68,7 @@ class TimelineItemContentMessageFactory @Inject constructor(
     private val fileExtensionExtractor: FileExtensionExtractor,
     private val featureFlagService: FeatureFlagService,
     private val htmlConverterProvider: HtmlConverterProvider,
+    private val permalinkParser: PermalinkParser,
 ) {
     suspend fun create(content: MessageContent, senderDisplayName: String, eventId: EventId?): TimelineItemEventContent {
         return when (val messageType = content.type) {
@@ -74,7 +76,10 @@ class TimelineItemContentMessageFactory @Inject constructor(
                 val emoteBody = "* $senderDisplayName ${messageType.body.trimEnd()}"
                 TimelineItemEmoteContent(
                     body = emoteBody,
-                    htmlDocument = messageType.formatted?.toHtmlDocument(prefix = "* $senderDisplayName"),
+                    htmlDocument = messageType.formatted?.toHtmlDocument(
+                        permalinkParser = permalinkParser,
+                        prefix = "* $senderDisplayName",
+                    ),
                     formattedBody = parseHtml(messageType.formatted, prefix = "* $senderDisplayName") ?: emoteBody.withLinks(),
                     isEdited = content.isEdited,
                 )
@@ -83,6 +88,8 @@ class TimelineItemContentMessageFactory @Inject constructor(
                 val aspectRatio = aspectRatioOf(messageType.info?.width, messageType.info?.height)
                 TimelineItemImageContent(
                     body = messageType.body.trimEnd(),
+                    formatted = messageType.formatted,
+                    filename = messageType.filename,
                     mediaSource = messageType.source,
                     thumbnailSource = messageType.info?.thumbnailSource,
                     mimeType = messageType.info?.mimetype ?: MimeTypes.OctetStream,
@@ -91,7 +98,7 @@ class TimelineItemContentMessageFactory @Inject constructor(
                     height = messageType.info?.height?.toInt(),
                     aspectRatio = aspectRatio,
                     formattedFileSize = fileSizeFormatter.format(messageType.info?.size ?: 0),
-                    fileExtension = fileExtensionExtractor.extractFromName(messageType.body)
+                    fileExtension = messageType.filename?.let { fileExtensionExtractor.extractFromName(it) }.orEmpty()
                 )
             }
             is StickerMessageType -> {
@@ -132,6 +139,8 @@ class TimelineItemContentMessageFactory @Inject constructor(
                 val aspectRatio = aspectRatioOf(messageType.info?.width, messageType.info?.height)
                 TimelineItemVideoContent(
                     body = messageType.body.trimEnd(),
+                    formatted = messageType.formatted,
+                    filename = messageType.filename,
                     thumbnailSource = messageType.info?.thumbnailSource,
                     videoSource = messageType.source,
                     mimeType = messageType.info?.mimetype ?: MimeTypes.OctetStream,
@@ -141,7 +150,7 @@ class TimelineItemContentMessageFactory @Inject constructor(
                     blurHash = messageType.info?.blurhash,
                     aspectRatio = aspectRatio,
                     formattedFileSize = fileSizeFormatter.format(messageType.info?.size ?: 0),
-                    fileExtension = fileExtensionExtractor.extractFromName(messageType.body)
+                    fileExtension = messageType.filename?.let { fileExtensionExtractor.extractFromName(it) }.orEmpty(),
                 )
             }
             is AudioMessageType -> {
@@ -193,7 +202,7 @@ class TimelineItemContentMessageFactory @Inject constructor(
                 val body = messageType.body.trimEnd()
                 TimelineItemNoticeContent(
                     body = body,
-                    htmlDocument = messageType.formatted?.toHtmlDocument(),
+                    htmlDocument = messageType.formatted?.toHtmlDocument(permalinkParser = permalinkParser),
                     formattedBody = parseHtml(messageType.formatted) ?: body.withLinks(),
                     isEdited = content.isEdited,
                 )
@@ -202,7 +211,7 @@ class TimelineItemContentMessageFactory @Inject constructor(
                 val body = messageType.body.trimEnd()
                 TimelineItemTextContent(
                     body = body,
-                    htmlDocument = messageType.formatted?.toHtmlDocument(),
+                    htmlDocument = messageType.formatted?.toHtmlDocument(permalinkParser = permalinkParser),
                     formattedBody = parseHtml(messageType.formatted) ?: body.withLinks(),
                     isEdited = content.isEdited,
                 )

@@ -20,13 +20,29 @@ import io.element.android.libraries.matrix.api.room.MatrixRoom
 import io.element.android.libraries.matrix.api.room.MessageEventType
 import io.element.android.libraries.matrix.api.room.StateEventType
 
+data class MatrixRoomPowerLevels(
+    val ban: Long,
+    val invite: Long,
+    val kick: Long,
+    val sendEvents: Long,
+    val redactEvents: Long,
+    val roomName: Long,
+    val roomAvatar: Long,
+    val roomTopic: Long,
+)
+
 /**
  * Shortcut for calling [MatrixRoom.canUserInvite] with our own user.
  */
 suspend fun MatrixRoom.canInvite(): Result<Boolean> = canUserInvite(sessionId)
 
 /**
- * Shortcut for calling [MatrixRoom.canBanUser] with our own user.
+ * Shortcut for calling [MatrixRoom.canUserKick] with our own user.
+ */
+suspend fun MatrixRoom.canKick(): Result<Boolean> = canUserKick(sessionId)
+
+/**
+ * Shortcut for calling [MatrixRoom.canUserBan] with our own user.
  */
 suspend fun MatrixRoom.canBan(): Result<Boolean> = canUserBan(sessionId)
 

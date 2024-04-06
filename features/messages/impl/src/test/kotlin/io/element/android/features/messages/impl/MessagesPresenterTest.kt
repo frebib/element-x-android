@@ -76,11 +76,11 @@ import io.element.android.libraries.matrix.test.A_SESSION_ID
 import io.element.android.libraries.matrix.test.A_SESSION_ID_2
 import io.element.android.libraries.matrix.test.FakeMatrixClient
 import io.element.android.libraries.matrix.test.core.aBuildMeta
-import io.element.android.libraries.matrix.test.encryption.FakeEncryptionService
+import io.element.android.libraries.matrix.test.permalink.FakePermalinkBuilder
+import io.element.android.libraries.matrix.test.permalink.FakePermalinkParser
 import io.element.android.libraries.matrix.test.room.FakeMatrixRoom
 import io.element.android.libraries.matrix.test.room.aRoomInfo
 import io.element.android.libraries.matrix.test.room.aRoomMember
-import io.element.android.libraries.matrix.test.verification.FakeSessionVerificationService
 import io.element.android.libraries.mediapickers.test.FakePickerProvider
 import io.element.android.libraries.mediaplayer.test.FakeMediaPlayer
 import io.element.android.libraries.mediaupload.api.MediaSender
@@ -232,6 +232,27 @@ class MessagesPresenterTest {
     }
 
     @Test
+    fun `present - handle action copy link`() = runTest {
+        val clipboardHelper = FakeClipboardHelper()
+        val event = aMessageEvent()
+        val matrixRoom = FakeMatrixRoom(
+            permalinkResult = { Result.success("a link") },
+        )
+        val presenter = createMessagesPresenter(
+            clipboardHelper = clipboardHelper,
+            matrixRoom = matrixRoom,
+        )
+        moleculeFlow(RecompositionMode.Immediate) {
+            presenter.present()
+        }.test {
+            val initialState = awaitFirstItem()
+            initialState.eventSink.invoke(MessagesEvents.HandleAction(TimelineItemAction.CopyLink, event))
+            assertThat(awaitItem().actionListState.target).isEqualTo(ActionListState.Target.None)
+            assertThat(clipboardHelper.clipboardContents).isEqualTo("a link")
+        }
+    }
+
+    @Test
     fun `present - handle action reply`() = runTest {
         val presenter = createMessagesPresenter()
         moleculeFlow(RecompositionMode.Immediate) {
@@ -270,6 +291,8 @@ class MessagesPresenterTest {
             val mediaMessage = aMessageEvent(
                 content = TimelineItemImageContent(
                     body = "image.jpg",
+                    formatted = null,
+                    filename = null,
                     mediaSource = MediaSource(AN_AVATAR_URL),
                     thumbnailSource = null,
                     mimeType = MimeTypes.Jpeg,
@@ -300,6 +323,8 @@ class MessagesPresenterTest {
             val mediaMessage = aMessageEvent(
                 content = TimelineItemVideoContent(
                     body = "video.mp4",
+                    formatted = null,
+                    filename = null,
                     duration = 10.milliseconds,
                     videoSource = MediaSource(AN_AVATAR_URL),
                     thumbnailSource = MediaSource(AN_AVATAR_URL),
@@ -721,6 +746,8 @@ class MessagesPresenterTest {
             richTextEditorStateFactory = TestRichTextEditorStateFactory(),
             permissionsPresenterFactory = permissionsPresenterFactory,
             currentSessionIdHolder = CurrentSessionIdHolder(FakeMatrixClient(A_SESSION_ID)),
+            permalinkParser = FakePermalinkParser(),
+            permalinkBuilder = FakePermalinkBuilder(),
         )
         val voiceMessageComposerPresenter = VoiceMessageComposerPresenter(
             this,
@@ -737,8 +764,6 @@ class MessagesPresenterTest {
             dispatchers = coroutineDispatchers,
             appScope = this,
             navigator = navigator,
-            encryptionService = FakeEncryptionService(),
-            verificationService = FakeSessionVerificationService(),
             redactedVoiceMessageManager = FakeRedactedVoiceMessageManager(),
             endPollAction = endPollAction,
             sendPollResponseAction = FakeSendPollResponseAction(),

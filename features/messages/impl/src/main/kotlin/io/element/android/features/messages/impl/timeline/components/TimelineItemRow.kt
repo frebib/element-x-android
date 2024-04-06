@@ -21,8 +21,8 @@ import androidx.compose.ui.Modifier
 import io.element.android.features.messages.impl.timeline.TimelineEvents
 import io.element.android.features.messages.impl.timeline.TimelineRoomInfo
 import io.element.android.features.messages.impl.timeline.model.TimelineItem
+import io.element.android.features.messages.impl.timeline.model.event.TimelineItemLegacyCallInviteContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemStateContent
-import io.element.android.features.messages.impl.timeline.session.SessionState
 import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.core.UserId
 
@@ -33,8 +33,8 @@ internal fun TimelineItemRow(
     renderReadReceipts: Boolean,
     isLastOutgoingMessage: Boolean,
     highlightedItem: String?,
-    sessionState: SessionState,
     onUserDataClick: (UserId) -> Unit,
+    onLinkClicked: (String) -> Unit,
     onClick: (TimelineItem.Event) -> Unit,
     onLongClick: (TimelineItem.Event) -> Unit,
     inReplyToClick: (EventId) -> Unit,
@@ -51,12 +51,11 @@ internal fun TimelineItemRow(
         is TimelineItem.Virtual -> {
             TimelineItemVirtualRow(
                 virtual = timelineItem,
-                sessionState = sessionState,
                 modifier = modifier,
             )
         }
         is TimelineItem.Event -> {
-            if (timelineItem.content is TimelineItemStateContent) {
+            if (timelineItem.content is TimelineItemStateContent || timelineItem.content is TimelineItemLegacyCallInviteContent) {
                 TimelineItemStateEventRow(
                     event = timelineItem,
                     renderReadReceipts = renderReadReceipts,
@@ -78,6 +77,7 @@ internal fun TimelineItemRow(
                     onClick = { onClick(timelineItem) },
                     onLongClick = { onLongClick(timelineItem) },
                     onUserDataClick = onUserDataClick,
+                    onLinkClicked = onLinkClicked,
                     inReplyToClick = inReplyToClick,
                     onReactionClick = onReactionClick,
                     onReactionLongClick = onReactionLongClick,
@@ -97,11 +97,11 @@ internal fun TimelineItemRow(
                 renderReadReceipts = renderReadReceipts,
                 isLastOutgoingMessage = isLastOutgoingMessage,
                 highlightedItem = highlightedItem,
-                sessionState = sessionState,
                 onClick = onClick,
                 onLongClick = onLongClick,
                 inReplyToClick = inReplyToClick,
                 onUserDataClick = onUserDataClick,
+                onLinkClicked = onLinkClicked,
                 onTimestampClicked = onTimestampClicked,
                 onReactionClick = onReactionClick,
                 onReactionLongClick = onReactionLongClick,

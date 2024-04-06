@@ -34,9 +34,9 @@ import io.element.android.anvilannotations.ContributesNode
 import io.element.android.features.analytics.api.AnalyticsEntryPoint
 import io.element.android.features.ftue.api.FtueEntryPoint
 import io.element.android.features.ftue.impl.notifications.NotificationsOptInNode
-import io.element.android.features.ftue.impl.state.DefaultFtueState
+import io.element.android.features.ftue.impl.sessionverification.FtueSessionVerificationFlowNode
+import io.element.android.features.ftue.impl.state.DefaultFtueService
 import io.element.android.features.ftue.impl.state.FtueStep
-import io.element.android.features.ftue.impl.welcome.WelcomeNode
 import io.element.android.features.lockscreen.api.LockScreenEntryPoint
 import io.element.android.libraries.architecture.BackstackView
 import io.element.android.libraries.architecture.BaseFlowNode
@@ -56,7 +56,7 @@ import kotlinx.parcelize.Parcelize
 class FtueFlowNode @AssistedInject constructor(
     @Assisted buildContext: BuildContext,
     @Assisted plugins: List<Plugin>,
-    private val ftueState: DefaultFtueState,
+    private val ftueState: DefaultFtueService,
     private val analyticsEntryPoint: AnalyticsEntryPoint,
     private val analyticsService: AnalyticsService,
     private val lockScreenEntryPoint: LockScreenEntryPoint,
@@ -74,7 +74,7 @@ class FtueFlowNode @AssistedInject constructor(
         data object Placeholder : NavTarget
 
         @Parcelize
-        data object WelcomeScreen : NavTarget
+        data object SessionVerification : NavTarget
 
         @Parcelize
         data object NotificationsOptIn : NavTarget
@@ -110,14 +110,13 @@ class FtueFlowNode @AssistedInject constructor(
             NavTarget.Placeholder -> {
                 createNode<PlaceholderNode>(buildContext)
             }
-            NavTarget.WelcomeScreen -> {
-                val callback = object : WelcomeNode.Callback {
-                    override fun onContinueClicked() {
-                        ftueState.setWelcomeScreenShown()
+            NavTarget.SessionVerification -> {
+                val callback = object : FtueSessionVerificationFlowNode.Callback {
+                    override fun onDone() {
                         lifecycleScope.launch { moveToNextStep() }
                     }
                 }
-                createNode<WelcomeNode>(buildContext, listOf(callback))
+                createNode<FtueSessionVerificationFlowNode>(buildContext, listOf(callback))
             }
             NavTarget.NotificationsOptIn -> {
                 val callback = object : NotificationsOptInNode.Callback {
@@ -146,8 +145,8 @@ class FtueFlowNode @AssistedInject constructor(
 
     private fun moveToNextStep() {
         when (ftueState.getNextStep()) {
-            FtueStep.WelcomeScreen -> {
-                backstack.newRoot(NavTarget.WelcomeScreen)
+            FtueStep.SessionVerification -> {
+                backstack.newRoot(NavTarget.SessionVerification)
             }
             FtueStep.NotificationsOptIn -> {
                 backstack.newRoot(NavTarget.NotificationsOptIn)

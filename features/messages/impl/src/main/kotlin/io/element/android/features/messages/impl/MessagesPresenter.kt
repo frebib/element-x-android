@@ -50,6 +50,7 @@ import io.element.android.features.messages.impl.timeline.model.event.TimelineIt
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemEncryptedContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemFileContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemImageContent
+import io.element.android.features.messages.impl.timeline.model.event.TimelineItemLegacyCallInviteContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemLocationContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemPollContent
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemRedactedContent
@@ -88,6 +89,7 @@ import io.element.android.libraries.matrix.ui.room.canRedactOtherAsState
 import io.element.android.libraries.matrix.ui.room.canRedactOwnAsState
 import io.element.android.libraries.matrix.ui.room.canSendMessageAsState
 import io.element.android.libraries.textcomposer.model.MessageComposerMode
+import io.element.android.libraries.ui.strings.CommonStrings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -272,6 +274,7 @@ class MessagesPresenter @AssistedInject constructor(
     ) = launch {
         when (action) {
             TimelineItemAction.Copy -> handleCopyContents(targetEvent)
+            TimelineItemAction.CopyLink -> handleCopyLink(targetEvent)
             TimelineItemAction.Redact -> handleActionRedact(targetEvent)
             TimelineItemAction.Edit -> handleActionEdit(targetEvent, composerState, enableTextFormatting)
             TimelineItemAction.Reply,
@@ -294,8 +297,6 @@ class MessagesPresenter @AssistedInject constructor(
     private fun CoroutineScope.reinviteOtherUser(inviteProgress: MutableState<AsyncData<Unit>>) = launch(dispatchers.io) {
         inviteProgress.value = AsyncData.Loading()
         runCatching {
-            room.updateMembers()
-
             val memberList = when (val memberState = room.membersStateFlow.value) {
                 is MatrixRoomMembersState.Ready -> memberState.roomMembers
                 is MatrixRoomMembersState.Error -> memberState.prevRoomMembers.orEmpty()
@@ -400,6 +401,7 @@ class MessagesPresenter @AssistedInject constructor(
             is TimelineItemRedactedContent,
             is TimelineItemStateContent,
             is TimelineItemEncryptedContent,
+            is TimelineItemLegacyCallInviteContent,
             is TimelineItemUnknownContent -> null
         }
         val composerMode = MessageComposerMode.Reply(
@@ -435,6 +437,20 @@ class MessagesPresenter @AssistedInject constructor(
         event.eventId?.let { timelineState.eventSink(TimelineEvents.PollEndClicked(it)) }
     }
 
+    private suspend fun handleCopyLink(event: TimelineItem.Event) {
+        event.eventId ?: return
+        room.getPermalinkFor(event.eventId).fold(
+            onSuccess = { permalink ->
+                clipboardHelper.copyPlainText(permalink)
+                snackbarDispatcher.post(SnackbarMessage(CommonStrings.common_link_copied_to_clipboard))
+            },
+            onFailure = {
+                Timber.e(it, "Failed to get permalink for event ${event.eventId}")
+                snackbarDispatcher.post(SnackbarMessage(CommonStrings.common_error))
+            }
+        )
+    }
+
     private suspend fun handleCopyContents(event: TimelineItem.Event) {
         val content = when (event.content) {
             is TimelineItemTextBasedContent -> event.content.body
@@ -445,7 +461,7 @@ class MessagesPresenter @AssistedInject constructor(
         clipboardHelper.copyPlainText(content)
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            snackbarDispatcher.post(SnackbarMessage(R.string.screen_room_message_copied))
+            snackbarDispatcher.post(SnackbarMessage(R.string.screen_room_timeline_message_copied))
         }
     }
 }

@@ -60,7 +60,7 @@ allprojects {
         config.from(files("$rootDir/tools/detekt/detekt.yml"))
     }
     dependencies {
-        detektPlugins("io.nlopez.compose.rules:detekt:0.3.11")
+        detektPlugins("io.nlopez.compose.rules:detekt:0.3.12")
     }
 
     // KtLint
@@ -172,6 +172,7 @@ allprojects {
 
 // Register quality check tasks.
 tasks.register("runQualityChecks") {
+    dependsOn(":tests:konsist:testDebugUnitTest")
     project.subprojects {
         // For some reason `findByName("lint")` doesn't work
         tasks.findByPath("$path:lint")?.let { dependsOn(it) }

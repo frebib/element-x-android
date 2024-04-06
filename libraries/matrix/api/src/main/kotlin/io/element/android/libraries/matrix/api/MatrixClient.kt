@@ -29,6 +29,7 @@ import io.element.android.libraries.matrix.api.oidc.AccountManagementAction
 import io.element.android.libraries.matrix.api.pusher.PushersService
 import io.element.android.libraries.matrix.api.room.MatrixRoom
 import io.element.android.libraries.matrix.api.room.RoomMembershipObserver
+import io.element.android.libraries.matrix.api.roomdirectory.RoomDirectoryService
 import io.element.android.libraries.matrix.api.roomlist.RoomListService
 import io.element.android.libraries.matrix.api.sync.SyncService
 import io.element.android.libraries.matrix.api.user.MatrixSearchUserResults
@@ -42,6 +43,7 @@ import java.io.Closeable
 interface MatrixClient : Closeable {
     val sessionId: SessionId
     val deviceId: String
+    val userProfile: StateFlow<MatrixUser>
     val roomListService: RoomListService
     val mediaLoader: MatrixMediaLoader
     val sessionCoroutineScope: CoroutineScope
@@ -57,12 +59,14 @@ interface MatrixClient : Closeable {
     suspend fun setDisplayName(displayName: String): Result<Unit>
     suspend fun uploadAvatar(mimeType: String, data: ByteArray): Result<Unit>
     suspend fun removeAvatar(): Result<Unit>
+    suspend fun joinRoom(roomId: RoomId): Result<RoomId>
     fun syncService(): SyncService
     fun sessionVerificationService(): SessionVerificationService
     fun pushersService(): PushersService
     fun notificationService(): NotificationService
     fun notificationSettingsService(): NotificationSettingsService
     fun encryptionService(): EncryptionService
+    fun roomDirectoryService(): RoomDirectoryService
     suspend fun getCacheSize(): Long
 
     /**
@@ -77,8 +81,11 @@ interface MatrixClient : Closeable {
      * @param ignoreSdkError if true, the SDK will ignore any error and delete the session data anyway.
      */
     suspend fun logout(ignoreSdkError: Boolean): String?
-    suspend fun loadUserDisplayName(): Result<String>
-    suspend fun loadUserAvatarUrl(): Result<String?>
+
+    /**
+     * Retrieve the user profile, will also eventually emit a new value to [userProfile].
+     */
+    suspend fun getUserProfile(): Result<MatrixUser>
     suspend fun getAccountManagementUrl(action: AccountManagementAction?): Result<String?>
     suspend fun uploadMedia(mimeType: String, data: ByteArray, progressCallback: ProgressCallback?): Result<String>
     fun roomMembershipObserver(): RoomMembershipObserver

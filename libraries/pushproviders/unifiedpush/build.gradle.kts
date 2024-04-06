@@ -32,16 +32,20 @@ dependencies {
     implementation(projects.libraries.androidutils)
     implementation(projects.libraries.core)
     implementation(projects.libraries.matrix.api)
+    implementation(projects.libraries.uiStrings)
+    api(projects.libraries.troubleshoot.api)
 
     implementation(projects.libraries.pushstore.api)
     implementation(projects.libraries.pushproviders.api)
     implementation(projects.libraries.architecture)
     implementation(projects.libraries.core)
+    implementation(projects.services.appnavstate.api)
     implementation(projects.services.toolbox.api)
 
     implementation(projects.libraries.network)
     implementation(platform(libs.network.okhttp.bom))
     implementation(libs.network.okhttp.okhttp)
+    implementation(platform(libs.network.retrofit.bom))
     implementation(libs.network.retrofit)
 
     implementation(libs.serialization.json)
@@ -49,8 +53,11 @@ dependencies {
     // UnifiedPush library
     api(libs.unifiedpush)
 
+    testImplementation(libs.coroutines.test)
     testImplementation(libs.test.junit)
     testImplementation(libs.test.truth)
+    testImplementation(libs.test.turbine)
     testImplementation(projects.libraries.matrix.test)
     testImplementation(projects.tests.testutils)
+    testImplementation(projects.services.toolbox.test)
 }

@@ -26,7 +26,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.element.android.features.roomlist.impl.components.RoomListMenuAction
-import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.ui.strings.CommonStrings
 import io.element.android.tests.testutils.EnsureNeverCalled
@@ -35,7 +34,6 @@ import io.element.android.tests.testutils.EventsRecorder
 import io.element.android.tests.testutils.clickOn
 import io.element.android.tests.testutils.ensureCalledOnce
 import io.element.android.tests.testutils.ensureCalledOnceWithParam
-import kotlinx.collections.immutable.persistentListOf
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -46,40 +44,11 @@ class RoomListViewTest {
     @get:Rule val rule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun `clicking on close verification banner emits the expected Event`() {
-        val eventsRecorder = EventsRecorder<RoomListEvents>()
-        rule.setRoomListView(
-            state = aRoomListState(
-                securityBannerState = SecurityBannerState.SessionVerification,
-                eventSink = eventsRecorder,
-            )
-        )
-        val close = rule.activity.getString(CommonStrings.action_close)
-        rule.onNodeWithContentDescription(close).performClick()
-        eventsRecorder.assertSingle(RoomListEvents.DismissRequestVerificationPrompt)
-    }
-
-    @Test
-    fun `clicking on continue verification banner invokes the expected callback`() {
-        val eventsRecorder = EventsRecorder<RoomListEvents>(expectEvents = false)
-        ensureCalledOnce { callback ->
-            rule.setRoomListView(
-                state = aRoomListState(
-                    securityBannerState = SecurityBannerState.SessionVerification,
-                    eventSink = eventsRecorder,
-                ),
-                onVerifyClicked = callback,
-            )
-            rule.clickOn(CommonStrings.action_continue)
-        }
-    }
-
-    @Test
     fun `clicking on close recovery key banner emits the expected Event`() {
         val eventsRecorder = EventsRecorder<RoomListEvents>()
         rule.setRoomListView(
             state = aRoomListState(
-                securityBannerState = SecurityBannerState.RecoveryKeyConfirmation,
+                contentState = aRoomsContentState(securityBannerState = SecurityBannerState.RecoveryKeyConfirmation),
                 eventSink = eventsRecorder,
             )
         )
@@ -94,7 +63,7 @@ class RoomListViewTest {
         ensureCalledOnce { callback ->
             rule.setRoomListView(
                 state = aRoomListState(
-                    securityBannerState = SecurityBannerState.RecoveryKeyConfirmation,
+                    contentState = aRoomsContentState(securityBannerState = SecurityBannerState.RecoveryKeyConfirmation),
                     eventSink = eventsRecorder,
                 ),
                 onConfirmRecoveryKeyClicked = callback,
@@ -110,7 +79,7 @@ class RoomListViewTest {
             rule.setRoomListView(
                 state = aRoomListState(
                     eventSink = eventsRecorder,
-                    roomList = AsyncData.Success(persistentListOf()),
+                    contentState = anEmptyContentState(),
                 ),
                 onCreateRoomClicked = callback,
             )
@@ -124,7 +93,7 @@ class RoomListViewTest {
         val state = aRoomListState(
             eventSink = eventsRecorder,
         )
-        val room0 = state.roomList.dataOrNull()!!.first()
+        val room0 = state.contentAsRooms().summaries.first()
         ensureCalledOnceWithParam(room0.roomId) { callback ->
             rule.setRoomListView(
                 state = state,
@@ -140,7 +109,7 @@ class RoomListViewTest {
         val state = aRoomListState(
             eventSink = eventsRecorder,
         )
-        val room0 = state.roomList.dataOrNull()!!.first()
+        val room0 = state.contentAsRooms().summaries.first()
         rule.setRoomListView(
             state = state,
         )
@@ -170,7 +139,7 @@ class RoomListViewTest {
     fun `clicking on invites invokes the expected callback`() {
         val eventsRecorder = EventsRecorder<RoomListEvents>()
         val state = aRoomListState(
-            invitesState = InvitesState.NewInvites,
+            contentState = aRoomsContentState(invitesState = InvitesState.NewInvites),
             eventSink = eventsRecorder,
         )
         ensureCalledOnce { callback ->
@@ -187,24 +156,24 @@ private fun <R : TestRule> AndroidComposeTestRule<R, ComponentActivity>.setRoomL
     state: RoomListState,
     onRoomClicked: (RoomId) -> Unit = EnsureNeverCalledWithParam(),
     onSettingsClicked: () -> Unit = EnsureNeverCalled(),
-    onVerifyClicked: () -> Unit = EnsureNeverCalled(),
     onConfirmRecoveryKeyClicked: () -> Unit = EnsureNeverCalled(),
     onCreateRoomClicked: () -> Unit = EnsureNeverCalled(),
     onInvitesClicked: () -> Unit = EnsureNeverCalled(),
     onRoomSettingsClicked: (RoomId) -> Unit = EnsureNeverCalledWithParam(),
     onMenuActionClicked: (RoomListMenuAction) -> Unit = EnsureNeverCalledWithParam(),
+    onRoomDirectorySearchClicked: () -> Unit = EnsureNeverCalled(),
 ) {
     setContent {
         RoomListView(
             state = state,
             onRoomClicked = onRoomClicked,
             onSettingsClicked = onSettingsClicked,
-            onVerifyClicked = onVerifyClicked,
             onConfirmRecoveryKeyClicked = onConfirmRecoveryKeyClicked,
             onCreateRoomClicked = onCreateRoomClicked,
             onInvitesClicked = onInvitesClicked,
             onRoomSettingsClicked = onRoomSettingsClicked,
             onMenuActionClicked = onMenuActionClicked,
+            onRoomDirectorySearchClicked = onRoomDirectorySearchClicked,
         )
     }
 }

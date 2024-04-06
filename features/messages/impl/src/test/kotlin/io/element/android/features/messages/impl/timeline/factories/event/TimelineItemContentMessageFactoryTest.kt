@@ -63,6 +63,7 @@ import io.element.android.libraries.matrix.api.timeline.item.event.TextMessageTy
 import io.element.android.libraries.matrix.api.timeline.item.event.VideoMessageType
 import io.element.android.libraries.matrix.api.timeline.item.event.VoiceMessageType
 import io.element.android.libraries.matrix.test.AN_EVENT_ID
+import io.element.android.libraries.matrix.test.permalink.FakePermalinkParser
 import io.element.android.libraries.matrix.ui.components.A_BLUR_HASH
 import io.element.android.libraries.mediaviewer.api.util.FileExtensionExtractorWithoutValidation
 import kotlinx.collections.immutable.persistentListOf
@@ -227,12 +228,14 @@ class TimelineItemContentMessageFactoryTest {
     fun `test create VideoMessageType`() = runTest {
         val sut = createTimelineItemContentMessageFactory()
         val result = sut.create(
-            content = createMessageContent(type = VideoMessageType("body", MediaSource("url"), null)),
+            content = createMessageContent(type = VideoMessageType("body", null, null, MediaSource("url"), null)),
             senderDisplayName = "Bob",
             eventId = AN_EVENT_ID,
         )
         val expected = TimelineItemVideoContent(
             body = "body",
+            formatted = null,
+            filename = null,
             duration = Duration.ZERO,
             videoSource = MediaSource(url = "url", json = null),
             thumbnailSource = null,
@@ -253,7 +256,9 @@ class TimelineItemContentMessageFactoryTest {
         val result = sut.create(
             content = createMessageContent(
                 type = VideoMessageType(
-                    body = "body.mp4",
+                    body = "body.mp4 caption",
+                    formatted = FormattedBody(MessageFormat.HTML, "formatted"),
+                    filename = "body.mp4",
                     source = MediaSource("url"),
                     info = VideoInfo(
                         duration = 1.minutes,
@@ -276,7 +281,9 @@ class TimelineItemContentMessageFactoryTest {
             eventId = AN_EVENT_ID,
         )
         val expected = TimelineItemVideoContent(
-            body = "body.mp4",
+            body = "body.mp4 caption",
+            formatted = FormattedBody(MessageFormat.HTML, "formatted"),
+            filename = "body.mp4",
             duration = 1.minutes,
             videoSource = MediaSource(url = "url", json = null),
             thumbnailSource = MediaSource("url_thumbnail"),
@@ -420,12 +427,14 @@ class TimelineItemContentMessageFactoryTest {
     fun `test create ImageMessageType`() = runTest {
         val sut = createTimelineItemContentMessageFactory()
         val result = sut.create(
-            content = createMessageContent(type = ImageMessageType("body", MediaSource("url"), null)),
+            content = createMessageContent(type = ImageMessageType("body", null, null, MediaSource("url"), null)),
             senderDisplayName = "Bob",
             eventId = AN_EVENT_ID,
         )
         val expected = TimelineItemImageContent(
             body = "body",
+            formatted = null,
+            filename = null,
             mediaSource = MediaSource(url = "url", json = null),
             thumbnailSource = null,
             formattedFileSize = "0 Bytes",
@@ -470,7 +479,9 @@ class TimelineItemContentMessageFactoryTest {
         val result = sut.create(
             content = createMessageContent(
                 type = ImageMessageType(
-                    body = "body.jpg",
+                    body = "body.jpg caption",
+                    formatted = FormattedBody(MessageFormat.HTML, "formatted"),
+                    filename = "body.jpg",
                     source = MediaSource("url"),
                     info = ImageInfo(
                         height = 10L,
@@ -492,7 +503,9 @@ class TimelineItemContentMessageFactoryTest {
             eventId = AN_EVENT_ID,
         )
         val expected = TimelineItemImageContent(
-            body = "body.jpg",
+            body = "body.jpg caption",
+            formatted = FormattedBody(MessageFormat.HTML, "formatted"),
+            filename = "body.jpg",
             mediaSource = MediaSource(url = "url", json = null),
             thumbnailSource = MediaSource("url_thumbnail"),
             formattedFileSize = "888 Bytes",
@@ -652,6 +665,7 @@ class TimelineItemContentMessageFactoryTest {
         fileExtensionExtractor = FileExtensionExtractorWithoutValidation(),
         featureFlagService = featureFlagService,
         htmlConverterProvider = FakeHtmlConverterProvider(htmlConverterTransform),
+        permalinkParser = FakePermalinkParser(),
     )
 
     private fun createStickerContent(

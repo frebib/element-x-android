@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="confirm_recovery_key_banner_message">"A csevegés biztonsági mentése nincs szinkronban. Meg kell erősítened a helyreállítási kulcsát, hogy továbbra is hozzáférj a csevegés biztonsági mentéséhez."</string>
+  <string name="confirm_recovery_key_banner_message">"A csevegés biztonsági mentése nincs szinkronban. Meg kell erősítenie a helyreállítási kulcsát, hogy továbbra is hozzáférjen a csevegés biztonsági mentéséhez."</string>
   <string name="confirm_recovery_key_banner_title">"Helyreállítási kulcs megerősítése"</string>
   <string name="screen_migration_message">"Ez egy egyszeri folyamat, köszönjük a türelmét."</string>
   <string name="screen_migration_title">"A fiók beállítása."</string>
@@ -8,13 +8,23 @@
   <string name="screen_roomlist_empty_message">"Kezdje azzal, hogy üzenetet küld valakinek."</string>
   <string name="screen_roomlist_empty_title">"Még nincsenek csevegések."</string>
   <string name="screen_roomlist_filter_favourites">"Kedvencek"</string>
+  <string name="screen_roomlist_filter_favourites_empty_state_subtitle">"A csevegési beállításokban csevegéseket adhat hozzá a kedvencekhez.
+Egyelőre törölheti a szűrőket a többi csevegés megtekintéséhez."</string>
+  <string name="screen_roomlist_filter_favourites_empty_state_title">"Még nincsenek kedvenc csevegései"</string>
   <string name="screen_roomlist_filter_low_priority">"Alacsony prioritás"</string>
+  <string name="screen_roomlist_filter_mixed_empty_state_subtitle">"Kikapcsolhatja a szűrőket a többi csevegés megtekintéséhez"</string>
+  <string name="screen_roomlist_filter_mixed_empty_state_title">"Ehhez a kiválasztáshoz nem tartoznak csevegések"</string>
   <string name="screen_roomlist_filter_people">"Emberek"</string>
+  <string name="screen_roomlist_filter_people_empty_state_title">"Még nincsenek privát üzenetei"</string>
   <string name="screen_roomlist_filter_rooms">"Szobák"</string>
+  <string name="screen_roomlist_filter_rooms_empty_state_title">"Még nincs egy szobában sem"</string>
   <string name="screen_roomlist_filter_unreads">"Olvasatlan"</string>
+  <string name="screen_roomlist_filter_unreads_empty_state_title">"Gratulálunk!
+Nincs olvasatlan üzenete!"</string>
   <string name="screen_roomlist_main_space_title">"Összes csevegés"</string>
   <string name="screen_roomlist_mark_as_read">"Megjelölés olvasottként"</string>
   <string name="screen_roomlist_mark_as_unread">"Megjelölés olvasatlanként"</string>
+  <string name="screen_roomlist_room_directory_button_title">"Összes szoba böngészése"</string>
   <string name="session_verification_banner_message">"Úgy tűnik, hogy új eszközt használ. Ellenőrizze egy másik eszközzel, hogy a továbbiakban elérje a titkosított üzeneteket."</string>
   <string name="session_verification_banner_title">"Ellenőrizze, hogy Ön az"</string>
 </resources>

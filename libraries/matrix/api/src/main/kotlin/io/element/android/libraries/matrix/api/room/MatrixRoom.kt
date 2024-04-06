@@ -29,6 +29,8 @@ import io.element.android.libraries.matrix.api.media.MediaUploadHandler
 import io.element.android.libraries.matrix.api.media.VideoInfo
 import io.element.android.libraries.matrix.api.poll.PollKind
 import io.element.android.libraries.matrix.api.room.location.AssetType
+import io.element.android.libraries.matrix.api.room.powerlevels.MatrixRoomPowerLevels
+import io.element.android.libraries.matrix.api.room.powerlevels.UserRoleChange
 import io.element.android.libraries.matrix.api.timeline.MatrixTimeline
 import io.element.android.libraries.matrix.api.timeline.ReceiptType
 import io.element.android.libraries.matrix.api.widget.MatrixWidgetDriver
@@ -48,6 +50,7 @@ interface MatrixRoom : Closeable {
     val topic: String?
     val avatarUrl: String?
     val isEncrypted: Boolean
+    val isSpace: Boolean
     val isDirect: Boolean
     val isPublic: Boolean
     val activeMemberCount: Long
@@ -79,6 +82,11 @@ interface MatrixRoom : Closeable {
      */
     suspend fun updateMembers()
 
+    /**
+     * Will return an updated member or an error.
+     */
+    suspend fun getUpdatedMember(userId: UserId): Result<RoomMember>
+
     suspend fun updateRoomNotificationSettings(): Result<Unit>
 
     val syncUpdateFlow: StateFlow<Long>
@@ -90,6 +98,16 @@ interface MatrixRoom : Closeable {
     suspend fun subscribeToSync()
 
     suspend fun unsubscribeFromSync()
+
+    suspend fun powerLevels(): Result<MatrixRoomPowerLevels>
+
+    suspend fun updatePowerLevels(matrixRoomPowerLevels: MatrixRoomPowerLevels): Result<Unit>
+
+    suspend fun resetPowerLevels(): Result<MatrixRoomPowerLevels>
+
+    suspend fun userRole(userId: UserId): Result<RoomMember.Role>
+
+    suspend fun updateUsersRoles(changes: List<UserRoleChange>): Result<Unit>
 
     suspend fun userDisplayName(userId: UserId): Result<String?>
 
@@ -105,9 +123,23 @@ interface MatrixRoom : Closeable {
 
     suspend fun redactEvent(eventId: EventId, reason: String? = null): Result<Unit>
 
-    suspend fun sendImage(file: File, thumbnailFile: File?, imageInfo: ImageInfo, progressCallback: ProgressCallback?): Result<MediaUploadHandler>
+    suspend fun sendImage(
+        file: File,
+        thumbnailFile: File?,
+        imageInfo: ImageInfo,
+        body: String?,
+        formattedBody: String?,
+        progressCallback: ProgressCallback?
+    ): Result<MediaUploadHandler>
 
-    suspend fun sendVideo(file: File, thumbnailFile: File?, videoInfo: VideoInfo, progressCallback: ProgressCallback?): Result<MediaUploadHandler>
+    suspend fun sendVideo(
+        file: File,
+        thumbnailFile: File?,
+        videoInfo: VideoInfo,
+        body: String?,
+        formattedBody: String?,
+        progressCallback: ProgressCallback?
+    ): Result<MediaUploadHandler>
 
     suspend fun sendAudio(file: File, audioInfo: AudioInfo, progressCallback: ProgressCallback?): Result<MediaUploadHandler>
 
@@ -128,6 +160,8 @@ interface MatrixRoom : Closeable {
     suspend fun inviteUserById(id: UserId): Result<Unit>
 
     suspend fun canUserInvite(userId: UserId): Result<Boolean>
+
+    suspend fun canUserKick(userId: UserId): Result<Boolean>
 
     suspend fun canUserBan(userId: UserId): Result<Boolean>
 
@@ -153,6 +187,12 @@ interface MatrixRoom : Closeable {
     suspend fun setTopic(topic: String): Result<Unit>
 
     suspend fun reportContent(eventId: EventId, reason: String, blockUserId: UserId?): Result<Unit>
+
+    suspend fun kickUser(userId: UserId, reason: String? = null): Result<Unit>
+
+    suspend fun banUser(userId: UserId, reason: String? = null): Result<Unit>
+
+    suspend fun unbanUser(userId: UserId, reason: String? = null): Result<Unit>
 
     suspend fun setIsFavorite(isFavorite: Boolean): Result<Unit>
 
@@ -270,6 +310,13 @@ interface MatrixRoom : Closeable {
      * @return The resulting [MatrixWidgetDriver], or a failure.
      */
     fun getWidgetDriver(widgetSettings: MatrixWidgetSettings): Result<MatrixWidgetDriver>
+
+    /**
+     * Get the permalink for the provided [eventId].
+     * @param eventId The event id to get the permalink for.
+     * @return The permalink, or a failure.
+     */
+    suspend fun getPermalinkFor(eventId: EventId): Result<String>
 
     override fun close() = destroy()
 }
