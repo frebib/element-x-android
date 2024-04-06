@@ -16,39 +16,58 @@
 
 package io.element.android.features.messages.impl.timeline.components.customreaction
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.emojibasebindings.Emoji
 import io.element.android.emojibasebindings.EmojibaseCategory
 import io.element.android.emojibasebindings.EmojibaseDatasource
 import io.element.android.emojibasebindings.EmojibaseStore
+import io.element.android.emojibasebindings.allEmojis
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.text.toSp
+import io.element.android.libraries.designsystem.theme.components.ElementSearchBarDefaults
 import io.element.android.libraries.designsystem.theme.components.Icon
-import io.element.android.libraries.designsystem.theme.components.SearchBar
+import io.element.android.libraries.designsystem.theme.components.IconButton
 import io.element.android.libraries.designsystem.theme.components.SearchBarResultState
+import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.ui.strings.CommonStrings
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
@@ -71,21 +90,12 @@ fun EmojiPicker(
     Column(modifier) {
         EmojiPickerSearchBar(
             query = state.searchQuery,
-            state = state.searchResults,
             active = state.isSearchActive,
-            selectedEmojis = selectedEmojis,
-            onActiveChanged = { state.eventSink(EmojiPickerEvents.OnSearchActiveChanged(it)) },
+            onActiveChange = { state.eventSink(EmojiPickerEvents.OnSearchActiveChanged(it)) },
             onQueryChange = { state.eventSink(EmojiPickerEvents.UpdateSearchQuery(it)) },
-            onEmojiSelected = {
-                state.eventSink(EmojiPickerEvents.OnSearchActiveChanged(false))
-                onEmojiSelected(it)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
         )
 
-        if (!state.isSearchActive) {
+        if (state.searchQuery.isEmpty()) {
             SecondaryTabRow(
                 selectedTabIndex = pagerState.currentPage,
             ) {
@@ -108,6 +118,32 @@ fun EmojiPicker(
                 val emojis = categories[category] ?: listOf()
                 EmojiGrid(emojis = emojis, selectedEmojis = selectedEmojis, onEmojiSelected = onEmojiSelected)
             }
+        } else {
+            when (state.searchResults) {
+                is SearchBarResultState.Results<ImmutableList<Emoji>> -> {
+                    EmojiGrid(
+                        emojis = state.searchResults.results,
+                        selectedEmojis = selectedEmojis,
+                        onEmojiSelected = onEmojiSelected,
+                    )
+                }
+
+                is SearchBarResultState.NoResultsFound<ImmutableList<Emoji>> -> {
+                    // No results found, show a message
+                    Spacer(Modifier.size(80.dp))
+
+                    Text(
+                        text = stringResource(CommonStrings.common_no_results),
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                else -> {
+                    // Not searching - nothing to show.
+                }
+            }
         }
     }
 }
@@ -117,9 +153,10 @@ private fun EmojiGrid(
     emojis: List<Emoji>,
     selectedEmojis: ImmutableSet<String>,
     onEmojiSelected: (Emoji) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     LazyVerticalGrid(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         columns = GridCells.Adaptive(minSize = 48.dp),
         contentPadding = PaddingValues(vertical = 10.dp, horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -141,35 +178,89 @@ private fun EmojiGrid(
 @Composable
 private fun EmojiPickerSearchBar(
     query: String,
-    state: SearchBarResultState<ImmutableList<Emoji>>,
-    active: Boolean, selectedEmojis: ImmutableSet<String>,
-    onActiveChanged: (Boolean) -> Unit,
+    active: Boolean,
+    onActiveChange: (Boolean) -> Unit,
     onQueryChange: (String) -> Unit,
-    onEmojiSelected: (Emoji) -> Unit,
-    modifier: Modifier = Modifier,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
-    SearchBar(
-        query = query,
-        onQueryChange = onQueryChange,
-        active = active,
-        onActiveChange = onActiveChanged,
-        placeHolderTitle = stringResource(CommonStrings.common_search_for_emoji),
-        resultState = state,
-        resultHandler = { results ->
-            EmojiGrid(emojis = results, selectedEmojis = selectedEmojis, onEmojiSelected = onEmojiSelected)
+    val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
+
+    TextField(
+        value = query,
+        onValueChange = onQueryChange,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+            .focusRequester(focusRequester)
+            .onFocusChanged { if (it.isFocused) onActiveChange(true) },
+        placeholder = {
+            Text(text = stringResource(CommonStrings.common_search_for_emoji))
         },
-        modifier = modifier,
+        trailingIcon = when {
+            query.isNotEmpty() -> {
+                {
+                    IconButton(onClick = {
+                        onQueryChange("")
+                    }) {
+                        Icon(
+                            imageVector = CompoundIcons.Close(),
+                            contentDescription = stringResource(CommonStrings.action_clear),
+                        )
+                    }
+                }
+            }
+
+            else -> {
+                {
+                    Icon(
+                        imageVector = CompoundIcons.Search(),
+                        contentDescription = stringResource(CommonStrings.action_search),
+                        tint = MaterialTheme.colorScheme.tertiary,
+                    )
+                }
+            }
+        },
+        shape = SearchBarDefaults.inputFieldShape,
+        singleLine = true,
+        colors = (
+            if (active) ElementSearchBarDefaults.activeColors().inputFieldColors
+            else ElementSearchBarDefaults.inactiveColors().inputFieldColors
+            )
+            .copy(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+            ),
+        interactionSource = interactionSource,
     )
+
+    // Automatically open the keyboard
+    LaunchedEffect(focusRequester) {
+        focusRequester.requestFocus()
+    }
+
+    val isFocused = interactionSource.collectIsFocusedAsState().value
+    val shouldClearFocus = !active && isFocused
+    LaunchedEffect(active) {
+        if (shouldClearFocus) {
+            focusManager.clearFocus()
+        }
+    }
+
+    BackHandler(enabled = active) {
+        onActiveChange(false)
+    }
 }
 
 @PreviewsDayNight
 @Composable
 internal fun EmojiPickerPreview() = ElementPreview {
+    val emojibaseStore = EmojibaseDatasource().load(LocalContext.current)
     EmojiPicker(
         onEmojiSelected = {},
-        emojibaseStore = EmojibaseDatasource().load(LocalContext.current),
+        emojibaseStore = emojibaseStore,
         selectedEmojis = persistentSetOf("😀", "😄", "😃"),
-        state = EmojiPickerState(false, "", SearchBarResultState.Results(listOf()), {}),
+        state = EmojiPickerState(false, "", SearchBarResultState.Results(emojibaseStore.allEmojis.subList(0, 20)), {}),
         modifier = Modifier.fillMaxWidth(),
     )
 }
