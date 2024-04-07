@@ -162,7 +162,7 @@ fun aCustomReactionState(
     target = target,
     selectedEmoji = persistentSetOf(),
     eventSink = eventSink,
-    searchState = EmojiPickerState(false, "", SearchBarResultState.Results(listOf()), {})
+    searchState = EmojiPickerState(false, "", SearchBarResultState.Initial()) {}
 )
 
 fun aReadReceiptBottomSheetState(

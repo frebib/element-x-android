@@ -26,9 +26,8 @@ import androidx.compose.runtime.setValue
 import io.element.android.emojibasebindings.Emoji
 import io.element.android.emojibasebindings.allEmojis
 import io.element.android.libraries.architecture.Presenter
+import io.element.android.libraries.core.bool.orFalse
 import io.element.android.libraries.designsystem.theme.components.SearchBarResultState
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -39,15 +38,10 @@ class EmojiPickerStatePresenter @Inject constructor(
     override fun present(): EmojiPickerState {
         var searchQuery by rememberSaveable { mutableStateOf("") }
         var searchActive by rememberSaveable { mutableStateOf(true) }
-        val searchResults = remember { mutableStateOf<SearchBarResultState<ImmutableList<Emoji>>>(SearchBarResultState.Initial()) }
+        val searchResults = remember { mutableStateOf<SearchBarResultState<List<Emoji>>>(SearchBarResultState.Initial()) }
 
         LaunchedEffect(searchQuery) {
-            val filter = emojibaseProvider.emojibaseStore.allEmojis.filter { emoji ->
-                emoji.label.contains(searchQuery, true)
-                    || emoji.tags?.any { it.contains(searchQuery, true) } ?: false
-                    || emoji.shortcodes.any { it.contains(searchQuery, true) }
-            }
-            searchResults.value = SearchBarResultState.Results(filter.toImmutableList())
+            searchResults.value = searchEmojis(searchQuery, emojibaseProvider.emojibaseStore.allEmojis)
         }
 
         return EmojiPickerState(
@@ -72,3 +66,18 @@ class EmojiPickerStatePresenter @Inject constructor(
         )
     }
 }
+
+fun searchEmojis(searchQuery: String, allEmojis: List<Emoji>): SearchBarResultState<List<Emoji>> {
+    if (searchQuery == "")
+        return SearchBarResultState.Initial()
+
+    val query = searchQuery.trim()
+    val matches = allEmojis.filter { emoji ->
+        emoji.unicode == query
+            || emoji.label.contains(query, true)
+            || emoji.tags?.any { it.contains(query, true) }.orFalse()
+            || emoji.shortcodes.any { it.contains(query, true) }
+    }
+    return if (matches.isEmpty()) SearchBarResultState.NoResultsFound() else SearchBarResultState.Results(matches)
+}
+

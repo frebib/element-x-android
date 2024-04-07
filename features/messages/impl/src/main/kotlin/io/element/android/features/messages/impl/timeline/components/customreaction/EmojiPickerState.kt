@@ -18,11 +18,10 @@ package io.element.android.features.messages.impl.timeline.components.customreac
 
 import io.element.android.emojibasebindings.Emoji
 import io.element.android.libraries.designsystem.theme.components.SearchBarResultState
-import kotlinx.collections.immutable.ImmutableList
 
 data class EmojiPickerState (
     val isSearchActive: Boolean,
     val searchQuery: String,
-    val searchResults: SearchBarResultState<ImmutableList<Emoji>>,
+    val searchResults: SearchBarResultState<List<Emoji>>,
     val eventSink: (EmojiPickerEvents) -> Unit,
 )
