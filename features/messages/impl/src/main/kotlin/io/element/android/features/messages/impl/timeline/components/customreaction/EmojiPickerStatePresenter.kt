@@ -29,22 +29,23 @@ import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.designsystem.theme.components.SearchBarResultState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import timber.log.Timber
 import javax.inject.Inject
 
 class EmojiPickerStatePresenter @Inject constructor(
     private val emojibaseProvider: EmojibaseProvider,
-): Presenter<EmojiPickerState> {
+) : Presenter<EmojiPickerState> {
     @Composable
     override fun present(): EmojiPickerState {
         var searchQuery by rememberSaveable { mutableStateOf("") }
-        var searchActive by rememberSaveable { mutableStateOf(false) }
+        var searchActive by rememberSaveable { mutableStateOf(true) }
         val searchResults = remember { mutableStateOf<SearchBarResultState<ImmutableList<Emoji>>>(SearchBarResultState.Initial()) }
 
         LaunchedEffect(searchQuery) {
             val filter = emojibaseProvider.emojibaseStore.allEmojis.filter { emoji ->
                 emoji.label.contains(searchQuery, true)
-                    || emoji.tags?.any{it.contains(searchQuery, true)} ?: false
-                    || emoji.shortcodes.any{it.contains(searchQuery, true)}
+                    || emoji.tags?.any { it.contains(searchQuery, true) } ?: false
+                    || emoji.shortcodes.any { it.contains(searchQuery, true) }
             }
             searchResults.value = SearchBarResultState.Results(filter.toImmutableList())
         }
@@ -57,10 +58,14 @@ class EmojiPickerStatePresenter @Inject constructor(
                 when (it) {
                     is EmojiPickerEvents.OnSearchActiveChanged -> {
                         searchActive = it.active
-                        searchQuery = ""
+                        Timber.tag("EmojiPicker").d("Search active changed: ${it.active}")
                     }
                     is EmojiPickerEvents.UpdateSearchQuery -> {
                         searchQuery = it.query
+                    }
+                    is EmojiPickerEvents.Reset -> {
+                        searchActive = true
+                        searchQuery = ""
                     }
                 }
             }

@@ -51,7 +51,7 @@ class CustomReactionPresenter @Inject constructor(
 
         fun handleDismissCustomReactionSheet() {
             target.value = CustomReactionState.Target.None
-            searchState.eventSink(EmojiPickerEvents.OnSearchActiveChanged(false))
+            searchState.eventSink(EmojiPickerEvents.Reset)
         }
 
         fun handleEvents(event: CustomReactionEvents) {

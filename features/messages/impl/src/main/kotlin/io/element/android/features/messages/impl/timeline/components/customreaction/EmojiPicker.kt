@@ -16,8 +16,9 @@
 
 package io.element.android.features.messages.impl.timeline.components.customreaction
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -49,6 +50,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -86,6 +88,7 @@ fun EmojiPicker(
     val coroutineScope = rememberCoroutineScope()
     val categories = remember { emojibaseStore.categories }
     val pagerState = rememberPagerState(pageCount = { EmojibaseCategory.entries.size })
+    val searchFocusRequester = remember { FocusRequester() }
 
     Column(modifier) {
         EmojiPickerSearchBar(
@@ -93,57 +96,78 @@ fun EmojiPicker(
             active = state.isSearchActive,
             onActiveChange = { state.eventSink(EmojiPickerEvents.OnSearchActiveChanged(it)) },
             onQueryChange = { state.eventSink(EmojiPickerEvents.UpdateSearchQuery(it)) },
+            focusRequester = searchFocusRequester,
         )
 
-        if (state.searchQuery.isEmpty()) {
-            SecondaryTabRow(
-                selectedTabIndex = pagerState.currentPage,
-            ) {
-                EmojibaseCategory.entries.forEachIndexed { index, category ->
-                    Tab(icon = {
-                        Icon(
-                            imageVector = category.icon, contentDescription = stringResource(id = category.title)
+        Column(
+            modifier = Modifier
+                .pointerInput(Unit) {
+                    awaitEachGesture {
+                        // For any consumed pointer event in this column, deactivate the search field
+                        awaitFirstDown(requireUnconsumed = false)
+                        if (state.isSearchActive) {
+                            state.eventSink(EmojiPickerEvents.OnSearchActiveChanged(false))
+                        }
+                    }
+                }
+        ) {
+            if (state.searchQuery.isEmpty()) {
+                SecondaryTabRow(
+                    selectedTabIndex = pagerState.currentPage,
+                ) {
+                    EmojibaseCategory.entries.forEachIndexed { index, category ->
+                        Tab(icon = {
+                            Icon(
+                                imageVector = category.icon, contentDescription = stringResource(id = category.title)
+                            )
+                        }, selected = pagerState.currentPage == index, onClick = {
+                            coroutineScope.launch { pagerState.animateScrollToPage(index) }
+                        })
+                    }
+                }
+
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxWidth(),
+                ) { index ->
+                    val category = EmojibaseCategory.entries[index]
+                    val emojis = categories[category] ?: listOf()
+                    EmojiGrid(emojis = emojis, selectedEmojis = selectedEmojis, onEmojiSelected = onEmojiSelected)
+                }
+            } else {
+                when (state.searchResults) {
+                    is SearchBarResultState.Results<ImmutableList<Emoji>> -> {
+                        EmojiGrid(
+                            emojis = state.searchResults.results,
+                            selectedEmojis = selectedEmojis,
+                            onEmojiSelected = onEmojiSelected,
                         )
-                    }, selected = pagerState.currentPage == index, onClick = {
-                        coroutineScope.launch { pagerState.animateScrollToPage(index) }
-                    })
+                    }
+
+                    is SearchBarResultState.NoResultsFound<ImmutableList<Emoji>> -> {
+                        // No results found, show a message
+                        Spacer(Modifier.size(80.dp))
+
+                        Text(
+                            text = stringResource(CommonStrings.common_no_results),
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+                    else -> {
+                        // Not searching - nothing to show.
+                    }
                 }
             }
+        }
+    }
 
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.fillMaxWidth(),
-            ) { index ->
-                val category = EmojibaseCategory.entries[index]
-                val emojis = categories[category] ?: listOf()
-                EmojiGrid(emojis = emojis, selectedEmojis = selectedEmojis, onEmojiSelected = onEmojiSelected)
-            }
-        } else {
-            when (state.searchResults) {
-                is SearchBarResultState.Results<ImmutableList<Emoji>> -> {
-                    EmojiGrid(
-                        emojis = state.searchResults.results,
-                        selectedEmojis = selectedEmojis,
-                        onEmojiSelected = onEmojiSelected,
-                    )
-                }
-
-                is SearchBarResultState.NoResultsFound<ImmutableList<Emoji>> -> {
-                    // No results found, show a message
-                    Spacer(Modifier.size(80.dp))
-
-                    Text(
-                        text = stringResource(CommonStrings.common_no_results),
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
-                else -> {
-                    // Not searching - nothing to show.
-                }
-            }
+    // Automatically open the keyboard if search is active
+    LaunchedEffect(Unit) {
+        if (state.isSearchActive) {
+            searchFocusRequester.requestFocus()
         }
     }
 }
@@ -181,9 +205,9 @@ private fun EmojiPickerSearchBar(
     active: Boolean,
     onActiveChange: (Boolean) -> Unit,
     onQueryChange: (String) -> Unit,
+    focusRequester: FocusRequester = FocusRequester.Default,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
-    val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
 
     TextField(
@@ -234,21 +258,12 @@ private fun EmojiPickerSearchBar(
         interactionSource = interactionSource,
     )
 
-    // Automatically open the keyboard
-    LaunchedEffect(focusRequester) {
-        focusRequester.requestFocus()
-    }
-
     val isFocused = interactionSource.collectIsFocusedAsState().value
     val shouldClearFocus = !active && isFocused
     LaunchedEffect(active) {
         if (shouldClearFocus) {
             focusManager.clearFocus()
         }
-    }
-
-    BackHandler(enabled = active) {
-        onActiveChange(false)
     }
 }
 
