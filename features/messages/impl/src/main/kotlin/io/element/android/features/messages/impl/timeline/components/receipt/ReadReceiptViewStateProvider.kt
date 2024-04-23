@@ -68,6 +68,7 @@ internal fun aReadReceiptData(
     index: Int,
     avatarData: AvatarData = anAvatarData(
         id = "$index",
+        name = (index+65).toChar().toString(),
         size = AvatarSize.TimelineReadReceipt
     ),
     formattedDate: String = "12:34",
