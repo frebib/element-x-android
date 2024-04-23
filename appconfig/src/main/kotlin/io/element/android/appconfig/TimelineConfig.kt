@@ -10,7 +10,7 @@ package io.element.android.appconfig
 import io.element.android.libraries.matrix.api.room.StateEventType
 
 object TimelineConfig {
-    const val MAX_READ_RECEIPT_TO_DISPLAY = 3
+    const val MAX_READ_RECEIPT_TO_DISPLAY = 4
 
     /**
      * Event types that will be filtered out from the timeline (i.e. not displayed).
