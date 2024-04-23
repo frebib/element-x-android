@@ -141,20 +141,26 @@ private fun ReadReceiptsAvatars(
         horizontalArrangement = Arrangement.spacedBy(4.dp - avatarStrokeSize),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        if (receipts.size > TimelineConfig.MAX_READ_RECEIPT_TO_DISPLAY) {
+            Text(
+                text = "+" + (receipts.size - TimelineConfig.MAX_READ_RECEIPT_TO_DISPLAY),
+                style = ElementTheme.typography.fontBodyXsRegular,
+                color = ElementTheme.colors.textSecondary,
+            )
+        }
         Box(
             contentAlignment = Alignment.CenterEnd,
         ) {
             receipts
                 .take(TimelineConfig.MAX_READ_RECEIPT_TO_DISPLAY)
-                .reversed()
                 .forEachIndexed { index, readReceiptData ->
                     Box(
                         modifier = Modifier
-                                .padding(end = (12.dp + avatarStrokeSize * 2) * index)
+                                .padding(end = (9.dp + avatarStrokeSize * 2) * index)
                                 .size(size = avatarSize + avatarStrokeSize * 2)
                                 .clip(CircleShape)
                                 .background(avatarStrokeColor)
-                                .zIndex(index.toFloat()),
+                                .zIndex(-index.toFloat()),
                         contentAlignment = Alignment.Center,
                     ) {
                         Avatar(
@@ -162,13 +168,6 @@ private fun ReadReceiptsAvatars(
                         )
                     }
                 }
-        }
-        if (receipts.size > TimelineConfig.MAX_READ_RECEIPT_TO_DISPLAY) {
-            Text(
-                text = "+" + (receipts.size - TimelineConfig.MAX_READ_RECEIPT_TO_DISPLAY),
-                style = ElementTheme.typography.fontBodyXsRegular,
-                color = ElementTheme.colors.textSecondary,
-            )
         }
     }
 }
