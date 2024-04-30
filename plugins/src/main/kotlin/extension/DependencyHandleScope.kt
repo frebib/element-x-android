@@ -77,7 +77,6 @@ private fun DependencyHandlerScope.addImplementationProjects(
             val buildFile = File(file, "build.gradle.kts")
             if (buildFile.exists() && file.name == nameFilter) {
                 implementation(project(newPath))
-                logger.lifecycle("Added implementation(project($newPath))")
             } else {
                 addImplementationProjects(file, newPath, nameFilter, logger)
             }
