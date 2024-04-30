@@ -7,7 +7,7 @@ set -e
 read -p "Do you want to build the Rust SDK from local source (yes/no) default to yes? " buildLocal
 buildLocal=${buildLocal:-yes}
 
-date=$(gdate +%Y%m%d%H%M%S)
+date=$(date +%Y%m%d%H%M%S)
 elementPwd=$(pwd)
 
 # Ask for the Rust SDK local source path
