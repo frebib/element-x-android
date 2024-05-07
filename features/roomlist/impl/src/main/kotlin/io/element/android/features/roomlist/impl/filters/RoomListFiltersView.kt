@@ -32,6 +32,8 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,11 +56,17 @@ fun RoomListFiltersView(
     state: RoomListFiltersState,
     modifier: Modifier = Modifier
 ) {
+    val previousFilters: MutableList<RoomListFilter> = remember { mutableStateListOf() }
+
     fun onClearFiltersClicked() {
+        previousFilters.clear()
+        previousFilters.addAll(state.selectedFilters())
         state.eventSink(RoomListFiltersEvents.ClearSelectedFilters)
     }
 
     fun onToggleFilter(filter: RoomListFilter) {
+        previousFilters.clear()
+        previousFilters.addAll(state.selectedFilters())
         state.eventSink(RoomListFiltersEvents.ToggleFilter(filter))
     }
 
@@ -85,7 +93,7 @@ fun RoomListFiltersView(
                 RoomListFilterView(
                     modifier = Modifier
                         .animateItemPlacement()
-                        .zIndex(-i.toFloat()),
+                        .zIndex((if (previousFilters.contains(filterWithSelection.filter)) state.filterSelectionStates.size else 0) - i.toFloat()),
                     roomListFilter = filterWithSelection.filter,
                     selected = filterWithSelection.isSelected,
                     onClick = ::onToggleFilter,
