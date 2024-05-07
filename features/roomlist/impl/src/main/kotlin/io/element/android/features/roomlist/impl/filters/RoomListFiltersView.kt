@@ -16,6 +16,7 @@
 
 package io.element.android.features.roomlist.impl.filters
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,7 +32,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -101,13 +101,6 @@ fun RoomListFiltersView(
             }
         }
     }
-    LaunchedEffect(state.filterSelectionStates) {
-        // Checking for canScrollBackward is necessary for the itemPlacementAnimation to work correctly.
-        // We don't want the itemPlacementAnimation to be triggered when clearing the filters.
-        if (!state.hasAnyFilterSelected || lazyListState.canScrollBackward) {
-            lazyListState.animateScrollToItem(0)
-        }
-    }
 }
 
 @Composable
@@ -137,16 +130,25 @@ private fun RoomListFilterView(
     onClick: (RoomListFilter) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val background = animateColorAsState(
+        targetValue = if (selected) ElementTheme.colors.bgActionPrimaryRest else ElementTheme.colors.bgCanvasDefault,
+        label = "chip background colour",
+    )
+    val textColour = animateColorAsState(
+        targetValue = if (selected) ElementTheme.colors.textOnSolidPrimary else ElementTheme.colors.textPrimary,
+        label = "chip text colour",
+    )
+
     FilterChip(
         selected = selected,
         onClick = { onClick(roomListFilter) },
         modifier = modifier.height(36.dp),
         shape = CircleShape,
         colors = FilterChipDefaults.filterChipColors(
-            containerColor = ElementTheme.colors.bgCanvasDefault,
-            selectedContainerColor = ElementTheme.colors.bgActionPrimaryRest,
-            labelColor = ElementTheme.colors.textPrimary,
-            selectedLabelColor = ElementTheme.colors.textOnSolidPrimary,
+            containerColor = background.value,
+            selectedContainerColor = background.value,
+            labelColor = textColour.value,
+            selectedLabelColor = textColour.value
         ),
         label = {
             Text(text = stringResource(id = roomListFilter.stringResource))
