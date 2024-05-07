@@ -38,6 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.libraries.designsystem.preview.ElementPreview
@@ -79,10 +80,12 @@ fun RoomListFiltersView(
                 )
             }
         }
-        for (filterWithSelection in state.filterSelectionStates) {
+        state.filterSelectionStates.forEachIndexed { i, filterWithSelection ->
             item(filterWithSelection.filter) {
                 RoomListFilterView(
-                    modifier = Modifier.animateItemPlacement(),
+                    modifier = Modifier
+                        .animateItemPlacement()
+                        .zIndex(-i.toFloat()),
                     roomListFilter = filterWithSelection.filter,
                     selected = filterWithSelection.isSelected,
                     onClick = ::onToggleFilter,
