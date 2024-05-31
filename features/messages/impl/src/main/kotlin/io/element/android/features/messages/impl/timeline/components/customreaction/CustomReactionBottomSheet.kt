@@ -32,6 +32,7 @@ import io.element.android.libraries.matrix.api.timeline.item.event.EventOrTransa
 fun CustomReactionBottomSheet(
     state: CustomReactionState,
     onSelectEmoji: (EventOrTransactionId, Emoji) -> Unit,
+    onSelectReaction: (EventOrTransactionId, String) -> Unit,
     emojiPickerRenderer: EmojiPickerRenderer,
     modifier: Modifier = Modifier,
 ) {
@@ -46,6 +47,12 @@ fun CustomReactionBottomSheet(
                 sheetState.hide(coroutineScope) {
                     state.eventSink(CustomReactionEvent.DismissCustomReactionSheet)
                     onSelectEmoji(state.target.event.eventOrTransactionId, emoji)
+                }
+            }
+            fun onReactionSelectedDismiss(reaction: String) {
+                sheetState.hide(coroutineScope) {
+                    state.eventSink(CustomReactionEvent.DismissCustomReactionSheet)
+                    onSelectReaction(state.target.event.eventOrTransactionId, reaction)
                 }
             }
 
@@ -63,6 +70,7 @@ fun CustomReactionBottomSheet(
                 emojiPickerRenderer.Render(
                     state = state.target.emojiPickerState,
                     onSelectEmoji = ::onEmojiSelectedDismiss,
+                    onSelectReaction = ::onReactionSelectedDismiss,
                     selectedEmojis = state.selectedEmoji,
                     modifier = Modifier.fillMaxSize(),
                     contentDescription = { emoji, isSelected ->

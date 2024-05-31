@@ -303,6 +303,9 @@ private fun PinnedMessagesListLoaded(
         onSelectEmoji = { eventOrTransactionId, emoji ->
             state.eventSink(PinnedMessagesListEvent.ToggleReaction(emoji.unicode, eventOrTransactionId))
         },
+        onSelectReaction = { eventOrTransactionId, reaction ->
+            state.eventSink(PinnedMessagesListEvent.ToggleReaction(reaction, eventOrTransactionId))
+        },
         emojiPickerRenderer = emojiPickerRenderer,
     )
     ReactionSummaryView(state = state.reactionSummaryState)

@@ -24,6 +24,7 @@ class DefaultEmojiPickerRenderer : EmojiPickerRenderer {
         onSelectEmoji: (Emoji) -> Unit,
         selectedEmojis: ImmutableSet<String>,
         modifier: Modifier,
+        onSelectReaction: ((String)->Unit)?,
         contentDescription: @Composable (Emoji, Boolean) -> String,
     ) {
         if (state is DefaultEmojiPickerState) {
@@ -32,6 +33,7 @@ class DefaultEmojiPickerRenderer : EmojiPickerRenderer {
                 onSelectEmoji = onSelectEmoji,
                 selectedEmojis = selectedEmojis,
                 contentDescription = contentDescription,
+                onSelectReaction = onSelectReaction,
                 modifier = modifier,
             )
         } else {
