@@ -11,6 +11,7 @@ package io.element.android.libraries.emoji.impl.picker
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +22,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
@@ -30,17 +32,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.element.android.emojibasebindings.Emoji
+import io.element.android.features.messages.impl.timeline.components.MessagesReactionButton
+import io.element.android.features.messages.impl.timeline.components.MessagesReactionsButtonContent
+import io.element.android.features.messages.impl.timeline.model.MAX_REACTION_LENGTH_CHARS
+import io.element.android.libraries.core.extensions.ellipsize
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.text.toSp
 import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.designsystem.theme.components.IconSource
 import io.element.android.libraries.designsystem.theme.components.SearchBar
+import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.emoji.impl.R
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
@@ -54,6 +62,7 @@ internal fun EmojiPickerView(
     onSelectEmoji: (Emoji) -> Unit,
     selectedEmojis: ImmutableSet<String>,
     modifier: Modifier = Modifier,
+    onSelectReaction: ((String) -> Unit)? = null,
     contentDescription: @Composable (emoji: Emoji, isSelected: Boolean) -> String = { emoji, _ -> emoji.unicode },
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -62,7 +71,9 @@ internal fun EmojiPickerView(
 
     Column(modifier) {
         SearchBar(
-            modifier = Modifier.padding(bottom = if (state.isSearchActive) 0.dp else 10.dp),
+            modifier = Modifier
+                .padding(bottom = if (state.isSearchActive) 0.dp else 10.dp)
+                .fillMaxWidth(),
             queryState = state.searchQuery,
             resultState = state.searchResults,
             active = state.isSearchActive,
@@ -70,6 +81,13 @@ internal fun EmojiPickerView(
             windowInsets = WindowInsets(0, 0, 0, 0),
             placeHolderTitle = stringResource(R.string.emoji_picker_search_placeholder),
         ) { emojis ->
+            if (onSelectReaction != null) {
+                FreeformReaction(
+                    searchQuery = state.searchQuery,
+                    onSelectReaction = onSelectReaction
+                )
+            }
+
             EmojiResults(
                 emojis = emojis,
                 isEmojiSelected = { selectedEmojis.contains(it.unicode) },
@@ -164,12 +182,39 @@ private fun EmojiResults(
     }
 }
 
+@Composable
+private fun FreeformReaction(
+    searchQuery: TextFieldState,
+    onSelectReaction: (String) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .padding(top = 12.dp, bottom = 6.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val reaction = searchQuery.text.toString().trim()
+
+        Text(text = "Tap to react with  ")
+        MessagesReactionButton(
+            content = MessagesReactionsButtonContent.Text(
+                text = reaction.ellipsize(MAX_REACTION_LENGTH_CHARS),
+                highlight = true,
+            ),
+            onClick = { onSelectReaction(reaction) },
+            onLongClick = {},
+        )
+    }
+}
+
 @PreviewsDayNight
 @Composable
 internal fun EmojiPickerViewPreview(@PreviewParameter(DefaultEmojiPickerStatePreviewParam::class) state: DefaultEmojiPickerState) = ElementPreview {
     EmojiPickerView(
         state = state,
         onSelectEmoji = {},
+        onSelectReaction = {},
         selectedEmojis = persistentSetOf("😀", "😄", "😃"),
         modifier = Modifier.fillMaxWidth(),
     )

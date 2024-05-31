@@ -330,6 +330,7 @@ private fun EmojiPickerBottomSheet(
     pickerState: io.element.android.libraries.emoji.api.picker.EmojiPickerState,
     emojiPickerRenderer: EmojiPickerRenderer,
     onSelectEmoji: (io.element.android.emojibasebindings.Emoji) -> Unit,
+    onSelectReaction: ((String) -> Unit)? = null,
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
@@ -344,6 +345,11 @@ private fun EmojiPickerBottomSheet(
             onSelectEmoji = { emoji ->
                 sheetState.hide(coroutineScope) {
                     onSelectEmoji(emoji)
+                }
+            },
+            onSelectReaction = { reaction ->
+                sheetState.hide(coroutineScope) {
+                    onSelectReaction?.invoke(reaction)
                 }
             },
             selectedEmojis = persistentSetOf(),

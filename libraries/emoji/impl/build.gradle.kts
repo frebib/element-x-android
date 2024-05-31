@@ -32,6 +32,8 @@ dependencies {
     implementation(projects.libraries.matrix.api)
     implementation(projects.libraries.uiStrings)
 
+    implementation(projects.features.messages.impl)
+
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.matrix.emojibase.bindings)
 
