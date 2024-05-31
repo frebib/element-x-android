@@ -35,6 +35,7 @@ interface EmojiPickerRenderer {
         onSelectEmoji: (Emoji) -> Unit,
         selectedEmojis: ImmutableSet<String>,
         modifier: Modifier = Modifier,
+        onSelectReaction: ((String) -> Unit)? = null,
         contentDescription: @Composable (Emoji, Boolean) -> String = { emoji, _ -> emoji.unicode },
     )
 }
@@ -46,6 +47,7 @@ object NoOpEmojiPickerRenderer : EmojiPickerRenderer {
         onSelectEmoji: (Emoji) -> Unit,
         selectedEmojis: ImmutableSet<String>,
         modifier: Modifier,
+        onSelectReaction: ((String) -> Unit)?,
         contentDescription: @Composable (Emoji, Boolean) -> String,
     ) = Unit
 }

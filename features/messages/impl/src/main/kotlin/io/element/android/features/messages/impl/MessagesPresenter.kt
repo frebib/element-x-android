@@ -271,7 +271,7 @@ class MessagesPresenter(
                     redactEventAction.value = AsyncAction.Uninitialized
                 }
                 is MessagesEvent.ToggleReaction -> {
-                    localCoroutineScope.toggleReaction(event.emoji, event.eventOrTransactionId)
+                    localCoroutineScope.toggleReaction(event.reaction, event.eventOrTransactionId)
                 }
                 is MessagesEvent.InviteDialogDismissed -> {
                     hasDismissedInviteDialog = true
