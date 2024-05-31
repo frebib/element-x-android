@@ -13,7 +13,7 @@ import io.element.android.libraries.matrix.api.timeline.item.event.EventOrTransa
 
 sealed interface MessagesEvents {
     data class HandleAction(val action: TimelineItemAction, val event: TimelineItem.Event) : MessagesEvents
-    data class ToggleReaction(val emoji: String, val eventOrTransactionId: EventOrTransactionId) : MessagesEvents
+    data class ToggleReaction(val reaction: String, val eventOrTransactionId: EventOrTransactionId) : MessagesEvents
     data class InviteDialogDismissed(val action: InviteDialogAction) : MessagesEvents
     data object Dismiss : MessagesEvents
 }
