@@ -26,7 +26,7 @@ import kotlinx.collections.immutable.ImmutableList
  * Reactions can be free text, so we need to limit the length
  * displayed on screen.
  */
-private const val MAX_DISPLAY_CHARS = 16
+internal const val MAX_REACTION_LENGTH_CHARS = 16
 
 /**
  * @property currentUserId the ID of the currently logged in user
@@ -41,9 +41,9 @@ data class AggregatedReaction(
     /**
      * The key to be displayed on screen.
      *
-     * See [MAX_DISPLAY_CHARS].
+     * See [MAX_REACTION_LENGTH_CHARS].
      */
-    val displayKey: String = key.ellipsize(MAX_DISPLAY_CHARS)
+    val displayKey: String = key.ellipsize(MAX_REACTION_LENGTH_CHARS)
 
     /**
      * The number of users who reacted with this key.
