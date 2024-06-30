@@ -100,6 +100,7 @@ fun RoomListFiltersView(
                 RoomListClearFiltersButton(
                     modifier = Modifier
                         .padding(start = 8.dp)
+                        .zIndex(-1f)
                         .testTag(TestTags.homeScreenClearFilters),
                     onClick = {
                         previousFilters.value = state.selectedFilters()
@@ -113,7 +114,7 @@ fun RoomListFiltersView(
         }
         state.filterSelectionStates.forEachIndexed { i, filterWithSelection ->
             item(filterWithSelection.filter) {
-                val zIndex = (if (previousFilters.value.contains(filterWithSelection.filter)) state.filterSelectionStates.size else 0) - i.toFloat()
+                val zIndex = (if (previousFilters.value.contains(filterWithSelection.filter)) 2 else 1) * state.filterSelectionStates.size - i.toFloat()
                 RoomListFilterView(
                     modifier = Modifier
                         .animateItem()
