@@ -35,7 +35,6 @@ internal fun MessagesViewWithTypingPreview(
         onEventClick = { false },
         onUserDataClick = {},
         onLinkClick = {},
-        onPreviewAttachments = {},
         onSendLocationClick = {},
         onCreatePollClick = {},
         onJoinCallClick = {},
