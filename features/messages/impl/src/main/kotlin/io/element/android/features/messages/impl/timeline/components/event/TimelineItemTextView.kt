@@ -45,6 +45,7 @@ import io.element.android.libraries.textcomposer.mentions.LocalMentionSpanTheme
 import io.element.android.libraries.textcomposer.mentions.MentionSpan
 import io.element.android.libraries.textcomposer.mentions.getMentionSpans
 import io.element.android.libraries.textcomposer.mentions.updateMentionStyles
+import io.element.android.libraries.ui.strings.isOnlyEmojis
 import io.element.android.wysiwyg.compose.EditorStyledText
 
 @Composable
@@ -59,11 +60,17 @@ fun TimelineItemTextView(
         LocalTextStyle provides ElementTheme.typography.fontBodyLgRegular
     ) {
         val body = getTextWithResolvedMentions(content)
+        val textStyle = ElementRichTextEditorStyle.textStyle()
+        val style = textStyle.copy(
+            text = textStyle.text.copy(
+                fontSize = textStyle.text.fontSize * (if (content.plainText.isOnlyEmojis()) 2.5 else 1.0)
+            )
+        )
         Box(modifier.semantics { contentDescription = content.plainText }) {
             EditorStyledText(
                 text = body,
                 onLinkClickedListener = onLinkClick,
-                style = ElementRichTextEditorStyle.textStyle(),
+                style = style,
                 onTextLayout = ContentAvoidingLayout.measureLegacyLastTextLine(onContentLayoutChange = onContentLayoutChange),
                 releaseOnDetach = false,
             )

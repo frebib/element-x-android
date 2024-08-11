@@ -61,6 +61,7 @@ class TimelineItemTextBasedContentProvider : PreviewParameterProvider<TimelineIt
         aTimelineItemNoticeContent().copy(formattedBody = buildSpanned("Notice")),
         aTimelineItemTextContent(),
         aTimelineItemTextContent().copy(formattedBody = buildSpanned("Text")),
+        aTimelineItemTextContent(body = "❤\uFE0F"),
     )
 }
 
