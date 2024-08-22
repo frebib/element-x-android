@@ -126,7 +126,6 @@ fun TimelineEventTimestampView(
                     modifier = Modifier.size(15.dp),
                     tint = shield.toIconColor(),
                 )
-                Spacer(modifier = Modifier.width(4.dp))
             }
         }
     }
