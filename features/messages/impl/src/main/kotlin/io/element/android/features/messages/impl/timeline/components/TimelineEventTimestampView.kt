@@ -91,7 +91,6 @@ fun TimelineEventTimestampView(
                         },
                 tint = shield.toIconColor(),
             )
-            Spacer(modifier = Modifier.width(4.dp))
         }
     }
 }
