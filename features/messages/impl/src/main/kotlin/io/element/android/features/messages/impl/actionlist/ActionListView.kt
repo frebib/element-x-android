@@ -19,12 +19,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -83,6 +86,7 @@ import io.element.android.libraries.designsystem.theme.components.ListItemStyle
 import io.element.android.libraries.designsystem.theme.components.ModalBottomSheet
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.theme.components.hide
+import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.ui.messages.sender.SenderName
 import io.element.android.libraries.matrix.ui.messages.sender.SenderNameMode
 import io.element.android.libraries.ui.strings.CommonStrings
@@ -93,6 +97,7 @@ import kotlinx.collections.immutable.ImmutableList
 fun ActionListView(
     state: ActionListState,
     onSelectAction: (action: TimelineItemAction, TimelineItem.Event) -> Unit,
+    onUserDataClick: (UserId) -> Unit,
     onEmojiReactionClick: (String, TimelineItem.Event) -> Unit,
     onCustomReactionClick: (TimelineItem.Event) -> Unit,
     onVerifiedUserSendFailureClick: (TimelineItem.Event) -> Unit,
@@ -101,6 +106,13 @@ fun ActionListView(
     val sheetState = rememberModalBottomSheetState()
     val coroutineScope = rememberCoroutineScope()
     val targetItem = (state.target as? ActionListState.Target.Success)?.event
+
+    fun onUserDataClick() {
+        if (targetItem == null) return
+        sheetState.hide(coroutineScope) {
+            onUserDataClick(targetItem.senderId)
+        }
+    }
 
     fun onItemActionClick(
         itemAction: TimelineItemAction
@@ -148,6 +160,7 @@ fun ActionListView(
         ) {
             ActionListViewContent(
                 state = state,
+                onUserDataClick = ::onUserDataClick,
                 onActionClick = ::onItemActionClick,
                 onEmojiReactionClick = ::onEmojiReactionClick,
                 onCustomReactionClick = ::onCustomReactionClick,
@@ -164,6 +177,7 @@ fun ActionListView(
 private fun ActionListViewContent(
     state: ActionListState,
     onActionClick: (TimelineItemAction) -> Unit,
+    onUserDataClick: () -> Unit,
     onEmojiReactionClick: (String) -> Unit,
     onCustomReactionClick: () -> Unit,
     onVerifiedUserSendFailureClick: () -> Unit,
@@ -185,6 +199,7 @@ private fun ActionListViewContent(
                     Column {
                         MessageSummary(
                             event = target.event,
+                            onUserDataClick = onUserDataClick,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
@@ -246,9 +261,12 @@ private fun ActionListViewContent(
 
 @Suppress("MultipleEmitters") // False positive
 @Composable
-private fun MessageSummary(event: TimelineItem.Event, modifier: Modifier = Modifier) {
+private fun MessageSummary(
+    event: TimelineItem.Event,
+    onUserDataClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val content: @Composable () -> Unit
-    val icon: @Composable () -> Unit = { Avatar(avatarData = event.senderAvatar.copy(size = AvatarSize.MessageActionSender)) }
     val contentStyle = ElementTheme.typography.fontBodyMdRegular.copy(color = MaterialTheme.colorScheme.secondary)
 
     @Composable
@@ -298,13 +316,24 @@ private fun MessageSummary(event: TimelineItem.Event, modifier: Modifier = Modif
         }
     }
     Row(modifier = modifier) {
-        icon()
+        Avatar(
+            avatarData = event.senderAvatar.copy(size = AvatarSize.MessageActionSender),
+            modifier = Modifier
+                .clip(CircleShape)
+                .clickable(onClick = onUserDataClick)
+                .padding(4.dp)
+        )
         Spacer(modifier = Modifier.width(8.dp))
         Column(modifier = Modifier.weight(1f)) {
             SenderName(
                 senderId = event.senderId,
                 senderProfile = event.senderProfile,
                 senderNameMode = SenderNameMode.ActionList,
+                modifier = Modifier
+                    .offset((-4).dp, 0.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .clickable(onClick = onUserDataClick)
+                    .padding(horizontal = 4.dp),
             )
             content()
         }
@@ -451,6 +480,7 @@ internal fun ActionListViewContentPreview(
     ActionListViewContent(
         state = state,
         onActionClick = {},
+        onUserDataClick = {},
         onEmojiReactionClick = {},
         onCustomReactionClick = {},
         onVerifiedUserSendFailureClick = {},

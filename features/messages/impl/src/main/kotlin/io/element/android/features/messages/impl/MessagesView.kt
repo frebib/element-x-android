@@ -236,6 +236,7 @@ fun MessagesView(
     ActionListView(
         state = state.actionListState,
         onSelectAction = ::onActionSelected,
+        onUserDataClick = onUserDataClick,
         onCustomReactionClick = { event ->
             state.customReactionState.eventSink(CustomReactionEvents.ShowCustomReactionSheet(event))
         },
