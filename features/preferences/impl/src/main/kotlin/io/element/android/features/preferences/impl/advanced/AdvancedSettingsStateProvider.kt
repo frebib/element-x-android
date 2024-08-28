@@ -17,6 +17,8 @@ open class AdvancedSettingsStateProvider : PreviewParameterProvider<AdvancedSett
             aAdvancedSettingsState(isDeveloperModeEnabled = true),
             aAdvancedSettingsState(showChangeThemeDialog = true),
             aAdvancedSettingsState(isSendPublicReadReceiptsEnabled = true),
+            aAdvancedSettingsState(showChangeSkinToneDialog = true),
+            aAdvancedSettingsState(skinTone = "🏽"),
         )
 }
 
@@ -25,6 +27,8 @@ fun aAdvancedSettingsState(
     isSendPublicReadReceiptsEnabled: Boolean = false,
     isReactionPickerSearchEnabled: Boolean = false,
     showChangeThemeDialog: Boolean = false,
+    skinTone: String? = null,
+    showChangeSkinToneDialog: Boolean = false,
     eventSink: (AdvancedSettingsEvents) -> Unit = {},
 ) = AdvancedSettingsState(
     isDeveloperModeEnabled = isDeveloperModeEnabled,
@@ -32,5 +36,7 @@ fun aAdvancedSettingsState(
     isReactionPickerSearchEnabled = isReactionPickerSearchEnabled,
     theme = Theme.System,
     showChangeThemeDialog = showChangeThemeDialog,
+    skinTone = skinTone,
+    showChangeSkinToneDialog = showChangeSkinToneDialog,
     eventSink = eventSink
 )

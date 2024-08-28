@@ -214,6 +214,7 @@ private fun SheetContent(
                     item {
                         EmojiReactionsRow(
                             highlightedEmojis = target.event.reactionsState.highlightedKeys,
+                            skinTone = target.skinTone,
                             onEmojiReactionClick = onEmojiReactionClick,
                             onCustomReactionClick = onCustomReactionClick,
                             modifier = Modifier.fillMaxWidth(),
@@ -322,6 +323,7 @@ private val emojiRippleRadius = 24.dp
 @Composable
 private fun EmojiReactionsRow(
     highlightedEmojis: ImmutableList<String>,
+    skinTone: String?,
     onEmojiReactionClick: (String) -> Unit,
     onCustomReactionClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -332,11 +334,11 @@ private fun EmojiReactionsRow(
     ) {
         // TODO use most recently used emojis here when available from the Rust SDK
         val defaultEmojis = sequenceOf(
-            "👍️",
-            "👎️",
+            "👍" + skinTone.orEmpty(),
+            "👎️" + skinTone.orEmpty(),
             "🔥",
             "❤️",
-            "👏"
+            "👏" + skinTone.orEmpty(),
         )
         for (emoji in defaultEmojis) {
             val isHighlighted = highlightedEmojis.contains(emoji)

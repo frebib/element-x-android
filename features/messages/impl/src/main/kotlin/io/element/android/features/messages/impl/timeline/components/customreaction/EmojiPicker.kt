@@ -8,11 +8,15 @@
 package io.element.android.features.messages.impl.timeline.components.customreaction
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.MutatePriority
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -27,18 +31,24 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -49,8 +59,10 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.emojibasebindings.Emoji
+import io.element.android.emojibasebindings.EmojiSkin
 import io.element.android.emojibasebindings.EmojibaseCategory
 import io.element.android.emojibasebindings.EmojibaseDatasource
 import io.element.android.emojibasebindings.EmojibaseStore
@@ -76,12 +88,13 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun EmojiPicker(
-    onSelectEmoji: (Emoji) -> Unit,
+    onSelectEmoji: (String) -> Unit,
     onSelectReaction: (String) -> Unit,
     emojibaseStore: EmojibaseStore,
     selectedEmojis: ImmutableSet<String>,
     state: EmojiPickerState,
     modifier: Modifier = Modifier,
+    skinTone: String? = null,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val categories = remember { emojibaseStore.categories }
@@ -131,7 +144,7 @@ fun EmojiPicker(
                     ) { index ->
                         val category = EmojibaseCategory.entries[index]
                         val emojis = categories[category] ?: listOf()
-                        EmojiGrid(emojis = emojis, selectedEmojis = selectedEmojis, onSelectEmoji = onSelectEmoji)
+                        EmojiGrid(emojis = emojis, selectedEmojis = selectedEmojis, onSelectEmoji = onSelectEmoji, skinTone = skinTone)
                     }
                 }
                 is SearchBarResultState.Results -> {
@@ -141,6 +154,7 @@ fun EmojiPicker(
                     )
                     EmojiGrid(
                         emojis = state.searchResults.results,
+                        skinTone = skinTone,
                         selectedEmojis = selectedEmojis,
                         onSelectEmoji = onSelectEmoji,
                     )
@@ -172,28 +186,78 @@ fun EmojiPicker(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EmojiGrid(
     emojis: List<Emoji>,
     selectedEmojis: ImmutableSet<String>,
-    onSelectEmoji: (Emoji) -> Unit,
+    onSelectEmoji: (String) -> Unit,
     modifier: Modifier = Modifier,
+    skinTone: String? = null,
 ) {
+    val scope = rememberCoroutineScope()
+    val emojiSize = 32.dp.toSp()
+    val horizontalArrangement = Arrangement.spacedBy(8.dp)
+    val contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
+    val cellSize = 48.dp
     LazyVerticalGrid(
         modifier = modifier.fillMaxSize(),
-        columns = GridCells.Adaptive(minSize = 48.dp),
-        contentPadding = PaddingValues(vertical = 10.dp, horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+        columns = GridCells.Adaptive(minSize = cellSize),
+        contentPadding = contentPadding,
+        horizontalArrangement = horizontalArrangement,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         items(emojis, key = { it.unicode }) { item ->
-            EmojiItem(
-                modifier = Modifier.aspectRatio(1f),
-                item = item,
-                isSelected = selectedEmojis.contains(item.unicode),
-                onSelectEmoji = onSelectEmoji,
-                emojiSize = 32.dp.toSp(),
-            )
+            val content = @Composable {
+                val emoji = if (skinTone != null) item.withSkinTone(skinTone)?.unicode ?: item.unicode else item.unicode
+                EmojiItem(
+                    modifier = Modifier.aspectRatio(1f),
+                    emoji = emoji,
+                    emojiSize = emojiSize,
+                    isSelected = selectedEmojis.contains(emoji),
+                    onSelectEmoji = onSelectEmoji,
+                    onLongPress = {},
+                )
+            }
+
+            if (item.skins != null) {
+                val scrollState = rememberScrollState()
+                val tooltipState = rememberTooltipState(initialIsVisible = false, isPersistent = true)
+                TooltipBox(
+                    positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                    tooltip = {
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(ElementTheme.colors.bgSubtleSecondary)
+                                .horizontalScroll(scrollState),
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(contentPadding),
+                                horizontalArrangement = horizontalArrangement,
+                            ) {
+                                val variants = listOf(item.unicode) + item.skins!!.map(EmojiSkin::unicode)
+                                variants.forEach { variant ->
+                                    EmojiItem(
+                                        emoji = variant,
+                                        emojiSize = emojiSize,
+                                        isSelected = selectedEmojis.contains(variant),
+                                        onSelectEmoji = {
+                                            scope.launch { tooltipState.dismiss() }
+                                            onSelectEmoji(it)
+                                        },
+                                        onLongPress = {
+                                            scope.launch { tooltipState.show(MutatePriority.UserInput) }
+                                        },
+                                    )
+                                }
+                            }
+                        }
+                    },
+                    state = tooltipState,
+                    content = content,
+                )
+            } else content()
         }
     }
 }
@@ -219,7 +283,7 @@ private fun EmojiPickerSearchBar(
             .focusRequester(focusRequester)
             .onFocusChanged { if (it.isFocused) onActiveChange(true) },
         placeholder = {
-            Text(text = stringResource(CommonStrings.common_search_for_emoji))
+            Text(text = "Search for emoji")
         },
         trailingIcon = when {
             query.isNotEmpty() -> {
@@ -318,7 +382,7 @@ internal fun EmojiPickerPreview() = ElementPreview {
 @Composable
 internal fun EmojiPickerSearchPreview() = ElementPreview {
     val emojibaseStore = EmojibaseDatasource().load(LocalContext.current)
-    val query = "grin"
+    val query = "thu"
     EmojiPicker(
         onSelectEmoji = {},
         onSelectReaction = {},
