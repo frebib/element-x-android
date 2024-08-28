@@ -191,6 +191,7 @@ private fun PinnedMessagesListLoaded(
     ActionListView(
         state = state.actionListState,
         onSelectAction = ::onActionSelected,
+        onUserDataClick = onUserDataClick,
         onCustomReactionClick = {},
         onEmojiReactionClick = { _, _ -> },
         onVerifiedUserSendFailureClick = {}
