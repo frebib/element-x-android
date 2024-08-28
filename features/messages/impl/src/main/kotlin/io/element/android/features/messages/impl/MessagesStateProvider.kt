@@ -176,6 +176,7 @@ fun aCustomReactionState(
 ) = CustomReactionState(
     target = target,
     selectedEmoji = persistentSetOf(),
+    skinTone = null,
     eventSink = eventSink,
     searchState = EmojiPickerState(false, false, "", SearchBarResultState.Initial()) {}
 )

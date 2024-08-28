@@ -36,6 +36,7 @@ open class ActionListStateProvider : PreviewParameterProvider<ActionListState> {
                         event = aTimelineItemEvent(
                             timelineItemReactions = reactionsState
                         ),
+                        skinTone = "🏽",
                         displayEmojiReactions = true,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemActionList(),
@@ -48,6 +49,7 @@ open class ActionListStateProvider : PreviewParameterProvider<ActionListState> {
                             displayNameAmbiguous = true,
                             timelineItemReactions = reactionsState,
                         ),
+                        skinTone = "🏽",
                         displayEmojiReactions = true,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemActionList(),
@@ -59,6 +61,7 @@ open class ActionListStateProvider : PreviewParameterProvider<ActionListState> {
                             content = aTimelineItemVideoContent(),
                             timelineItemReactions = reactionsState
                         ),
+                        skinTone = "🏽",
                         displayEmojiReactions = true,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemActionList(),
@@ -70,6 +73,7 @@ open class ActionListStateProvider : PreviewParameterProvider<ActionListState> {
                             content = aTimelineItemFileContent(),
                             timelineItemReactions = reactionsState
                         ),
+                        skinTone = "🏽",
                         displayEmojiReactions = true,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemActionList(),
@@ -81,6 +85,7 @@ open class ActionListStateProvider : PreviewParameterProvider<ActionListState> {
                             content = aTimelineItemAudioContent(),
                             timelineItemReactions = reactionsState
                         ),
+                        skinTone = "🏽",
                         displayEmojiReactions = true,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemActionList(),
@@ -92,6 +97,7 @@ open class ActionListStateProvider : PreviewParameterProvider<ActionListState> {
                             content = aTimelineItemVoiceContent(),
                             timelineItemReactions = reactionsState
                         ),
+                        skinTone = "🏽",
                         displayEmojiReactions = true,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemActionList(),
@@ -103,6 +109,7 @@ open class ActionListStateProvider : PreviewParameterProvider<ActionListState> {
                             content = aTimelineItemLocationContent(),
                             timelineItemReactions = reactionsState
                         ),
+                        skinTone = "🏽",
                         displayEmojiReactions = true,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemActionList(),
@@ -114,6 +121,7 @@ open class ActionListStateProvider : PreviewParameterProvider<ActionListState> {
                             content = aTimelineItemLocationContent(),
                             timelineItemReactions = reactionsState
                         ),
+                        skinTone = "🏽",
                         displayEmojiReactions = false,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemActionList(),
@@ -125,6 +133,7 @@ open class ActionListStateProvider : PreviewParameterProvider<ActionListState> {
                             content = aTimelineItemPollContent(),
                             timelineItemReactions = reactionsState
                         ),
+                        skinTone = "🏽",
                         displayEmojiReactions = false,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemPollActionList(),
@@ -136,6 +145,7 @@ open class ActionListStateProvider : PreviewParameterProvider<ActionListState> {
                             timelineItemReactions = reactionsState,
                             messageShield = MessageShield.UnknownDevice(isCritical = true)
                         ),
+                        skinTone = "🏽",
                         displayEmojiReactions = true,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemActionList(),

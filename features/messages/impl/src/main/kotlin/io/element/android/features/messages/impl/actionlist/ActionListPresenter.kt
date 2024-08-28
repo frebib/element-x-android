@@ -39,6 +39,7 @@ import io.element.android.libraries.di.RoomScope
 import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.room.MatrixRoom
 import io.element.android.libraries.preferences.api.store.AppPreferencesStore
+import io.element.android.libraries.preferences.api.store.SessionPreferencesStore
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -57,6 +58,7 @@ class DefaultActionListPresenter @AssistedInject constructor(
     private val postProcessor: TimelineItemActionPostProcessor,
     private val appPreferencesStore: AppPreferencesStore,
     private val isPinnedMessagesFeatureEnabled: IsPinnedMessagesFeatureEnabled,
+    private val sessionPreferencesStore: SessionPreferencesStore,
     private val room: MatrixRoom,
     private val userSendFailureFactory: VerifiedUserSendFailureFactory,
 ) : ActionListPresenter {
@@ -76,6 +78,7 @@ class DefaultActionListPresenter @AssistedInject constructor(
 
         val isDeveloperModeEnabled by appPreferencesStore.isDeveloperModeEnabledFlow().collectAsState(initial = false)
         val isPinnedEventsEnabled = isPinnedMessagesFeatureEnabled()
+        val skinTone by sessionPreferencesStore.getSkinTone().collectAsState(initial = null)
         val pinnedEventIds by remember {
             room.roomInfoFlow.map { it.pinnedEventIds }
         }.collectAsState(initial = persistentListOf())
@@ -85,6 +88,7 @@ class DefaultActionListPresenter @AssistedInject constructor(
                 ActionListEvents.Clear -> target.value = ActionListState.Target.None
                 is ActionListEvents.ComputeForMessage -> localCoroutineScope.computeForMessage(
                     timelineItem = event.event,
+                    skinTone = skinTone,
                     usersEventPermissions = event.userEventPermissions,
                     isDeveloperModeEnabled = isDeveloperModeEnabled,
                     isPinnedEventsEnabled = isPinnedEventsEnabled,
@@ -103,6 +107,7 @@ class DefaultActionListPresenter @AssistedInject constructor(
     private fun CoroutineScope.computeForMessage(
         timelineItem: TimelineItem.Event,
         usersEventPermissions: UserEventPermissions,
+        skinTone: String?,
         isDeveloperModeEnabled: Boolean,
         isPinnedEventsEnabled: Boolean,
         pinnedEventIds: ImmutableList<EventId>,
@@ -124,6 +129,7 @@ class DefaultActionListPresenter @AssistedInject constructor(
         if (actions.isNotEmpty() || displayEmojiReactions || verifiedUserSendFailure != VerifiedUserSendFailure.None) {
             target.value = ActionListState.Target.Success(
                 event = timelineItem,
+                skinTone = skinTone,
                 displayEmojiReactions = displayEmojiReactions,
                 verifiedUserSendFailure = verifiedUserSendFailure,
                 actions = actions.toImmutableList()

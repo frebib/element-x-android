@@ -18,7 +18,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.element.android.emojibasebindings.Emoji
 import io.element.android.libraries.androidutils.ui.hideKeyboard
 import io.element.android.libraries.designsystem.theme.components.ModalBottomSheet
 import io.element.android.libraries.designsystem.theme.components.hide
@@ -28,7 +27,7 @@ import io.element.android.libraries.matrix.api.timeline.item.event.EventOrTransa
 @Composable
 fun CustomReactionBottomSheet(
     state: CustomReactionState,
-    onSelectEmoji: (EventOrTransactionId, Emoji) -> Unit,
+    onSelectEmoji: (EventOrTransactionId, String) -> Unit,
     onSelectReaction: (EventOrTransactionId, String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -42,7 +41,7 @@ fun CustomReactionBottomSheet(
         state.eventSink(CustomReactionEvents.DismissCustomReactionSheet)
     }
 
-    fun onEmojiSelectedDismiss(emoji: Emoji) {
+    fun onEmojiSelectedDismiss(emoji: String) {
         localView.hideKeyboard()
         if (target?.event == null) return
         sheetState.hide(coroutineScope) {
@@ -72,6 +71,7 @@ fun CustomReactionBottomSheet(
                 onSelectReaction = ::onReactionSelectedDismiss,
                 emojibaseStore = target.emojibaseStore,
                 selectedEmojis = state.selectedEmoji,
+                skinTone = state.skinTone,
                 state = state.searchState,
                 modifier = Modifier.fillMaxSize(),
             )

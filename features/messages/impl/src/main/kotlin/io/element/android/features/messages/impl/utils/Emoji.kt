@@ -15,6 +15,8 @@ import com.sigpwned.emoji4j.core.GraphemeMatchResult
 import com.sigpwned.emoji4j.core.GraphemeMatcher
 import io.element.android.features.messages.impl.timeline.model.event.AN_EMOJI_ONLY_TEXT
 
+val SKIN_MODIFIERS = setOf("🏻", "🏼", "🏽", "🏾", "🏿")
+
 /**
  * Returns true if the string consists exclusively of "emoji or pictographic graphemes".
  */
