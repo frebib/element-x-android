@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -298,6 +299,7 @@ private fun TimelineItemEventRowContent(
                 event.senderId,
                 event.senderProfile,
                 event.senderAvatar,
+                onUserDataClick = onUserDataClick,
                 Modifier
                     .constrainAs(sender) {
                         top.linkTo(parent.top)
@@ -306,7 +308,6 @@ private fun TimelineItemEventRowContent(
                     }
                     .padding(horizontal = 16.dp)
                     .zIndex(1f)
-                    .clickable(onClick = onUserDataClick)
                     // This is redundant when using talkback
                     .clearAndSetSemantics {
                         invisibleToUser()
@@ -404,16 +405,25 @@ private fun MessageSenderInformation(
     senderId: UserId,
     senderProfile: ProfileTimelineDetails,
     senderAvatar: AvatarData,
+    onUserDataClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val avatarColors = AvatarColorsProvider.provide(senderAvatar.id)
     Row(modifier = modifier) {
-        Avatar(senderAvatar)
-        Spacer(modifier = Modifier.width(4.dp))
+        Avatar(
+            avatarData = senderAvatar,
+            modifier = Modifier
+                .clip(CircleShape)
+                .clickable(onClick = onUserDataClick)
+        )
         SenderName(
             senderId = senderId,
             senderProfile = senderProfile,
             senderNameMode = SenderNameMode.Timeline(avatarColors.foreground),
+            modifier = Modifier
+                .clip(RoundedCornerShape(4.dp))
+                .clickable(onClick = onUserDataClick)
+                .padding(horizontal = 4.dp),
         )
     }
 }
