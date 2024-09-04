@@ -306,7 +306,10 @@ private fun PinnedMessagesListLoaded(
         },
         emojiPickerRenderer = emojiPickerRenderer,
     )
-    ReactionSummaryView(state = state.reactionSummaryState)
+    ReactionSummaryView(
+        state = state.reactionSummaryState,
+        onUserDataClick = {},
+    )
 }
 
 @Composable

@@ -33,6 +33,7 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -69,6 +70,7 @@ import io.element.android.libraries.designsystem.text.toDp
 import io.element.android.libraries.designsystem.theme.components.ModalBottomSheet
 import io.element.android.libraries.designsystem.theme.components.Surface
 import io.element.android.libraries.designsystem.theme.components.Text
+import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.media.MediaSource
 import io.element.android.libraries.matrix.api.user.MatrixUser
 import io.element.android.libraries.matrix.ui.media.MediaRequestData
@@ -81,8 +83,12 @@ internal val REACTION_SUMMARY_LINE_HEIGHT = 25.sp
 @Composable
 fun ReactionSummaryView(
     state: ReactionSummaryState,
+    onUserDataClick: (UserId) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val sheetState = rememberModalBottomSheetState()
+    val coroutineScope = rememberCoroutineScope()
+
     fun onDismiss() {
         state.eventSink(ReactionSummaryEvent.Clear)
     }
@@ -93,7 +99,15 @@ fun ReactionSummaryView(
             modifier = modifier,
             scrollable = false,
         ) {
-            ReactionSummaryViewContent(summary = state.target)
+            ReactionSummaryViewContent(
+                summary = state.target,
+                onUserDataClick = {
+                    coroutineScope.launch {
+                        sheetState.hide()
+                        onUserDataClick.invoke(it)
+                    }
+                },
+            )
         }
     }
 }
@@ -101,6 +115,7 @@ fun ReactionSummaryView(
 @Composable
 private fun ReactionSummaryViewContent(
     summary: ReactionSummaryState.Summary,
+    onUserDataClick: (UserId) -> Unit,
 ) {
     val animationScope = rememberCoroutineScope()
     var selectedReactionKey: String by rememberSaveable { mutableStateOf(summary.selectedKey) }
@@ -152,7 +167,8 @@ private fun ReactionSummaryViewContent(
                         avatarData = user.getAvatarData(AvatarSize.UserListItem),
                         name = user.displayName ?: user.userId.value,
                         userId = user.userId.value,
-                        sentTime = sender.sentTime
+                        sentTime = sender.sentTime,
+                        onUserDataClick = { onUserDataClick(sender.senderId) },
                     )
                 }
             }
@@ -241,11 +257,13 @@ private fun SenderRow(
     name: String,
     userId: String,
     sentTime: String,
+    onUserDataClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
+            .clickable(onClick = onUserDataClick)
             .padding(start = 16.dp, top = 4.dp, end = 16.dp, bottom = 4.dp)
             .semantics(mergeDescendants = true) {},
         verticalAlignment = Alignment.CenterVertically
@@ -295,5 +313,8 @@ private fun SenderRow(
 internal fun ReactionSummaryViewContentPreview(
     @PreviewParameter(ReactionSummaryStatePreviewParam::class) state: ReactionSummaryState
 ) = ElementPreview {
-    ReactionSummaryViewContent(summary = state.target as ReactionSummaryState.Summary)
+    ReactionSummaryViewContent(
+        summary = state.target as ReactionSummaryState.Summary,
+        onUserDataClick = {},
+    )
 }
