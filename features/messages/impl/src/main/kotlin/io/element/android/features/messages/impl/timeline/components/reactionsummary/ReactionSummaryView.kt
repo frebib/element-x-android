@@ -63,6 +63,7 @@ import io.element.android.libraries.designsystem.text.toDp
 import io.element.android.libraries.designsystem.theme.components.ModalBottomSheet
 import io.element.android.libraries.designsystem.theme.components.Surface
 import io.element.android.libraries.designsystem.theme.components.Text
+import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.media.MediaSource
 import io.element.android.libraries.matrix.api.user.MatrixUser
 import io.element.android.libraries.matrix.ui.media.MediaRequestData
@@ -75,9 +76,11 @@ internal val REACTION_SUMMARY_LINE_HEIGHT = 25.sp
 @Composable
 fun ReactionSummaryView(
     state: ReactionSummaryState,
+    onUserDataClick: (UserId) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val sheetState = rememberModalBottomSheetState()
+    val coroutineScope = rememberCoroutineScope()
 
     fun onDismiss() {
         state.eventSink(ReactionSummaryEvents.Clear)
@@ -89,7 +92,15 @@ fun ReactionSummaryView(
             sheetState = sheetState,
             modifier = modifier
         ) {
-            ReactionSummaryViewContent(summary = state.target)
+            ReactionSummaryViewContent(
+                summary = state.target,
+                onUserDataClick = {
+                    coroutineScope.launch {
+                        sheetState.hide()
+                        onUserDataClick.invoke(it)
+                    }
+                },
+            )
         }
     }
 }
@@ -98,6 +109,7 @@ fun ReactionSummaryView(
 @Composable
 private fun ReactionSummaryViewContent(
     summary: ReactionSummaryState.Summary,
+    onUserDataClick: (UserId) -> Unit,
 ) {
     val animationScope = rememberCoroutineScope()
     var selectedReactionKey: String by rememberSaveable { mutableStateOf(summary.selectedKey) }
@@ -142,14 +154,13 @@ private fun ReactionSummaryViewContent(
         HorizontalPager(state = pagerState) { page ->
             LazyColumn(modifier = Modifier.fillMaxHeight()) {
                 items(summary.reactions[page].senders) { sender ->
-
                     val user = sender.user ?: MatrixUser(userId = sender.senderId)
-
                     SenderRow(
                         avatarData = user.getAvatarData(AvatarSize.UserListItem),
                         name = user.displayName ?: user.userId.value,
                         userId = user.userId.value,
-                        sentTime = sender.sentTime
+                        sentTime = sender.sentTime,
+                        onUserDataClick = { onUserDataClick(sender.senderId) },
                     )
                 }
             }
@@ -227,11 +238,13 @@ private fun SenderRow(
     name: String,
     userId: String,
     sentTime: String,
+    onUserDataClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
+            .clickable(onClick = onUserDataClick)
             .padding(start = 16.dp, top = 4.dp, end = 16.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -277,5 +290,8 @@ private fun SenderRow(
 internal fun ReactionSummaryViewContentPreview(
     @PreviewParameter(ReactionSummaryStateProvider::class) state: ReactionSummaryState
 ) = ElementPreview {
-    ReactionSummaryViewContent(summary = state.target as ReactionSummaryState.Summary)
+    ReactionSummaryViewContent(
+        summary = state.target as ReactionSummaryState.Summary,
+        onUserDataClick = {},
+    )
 }
