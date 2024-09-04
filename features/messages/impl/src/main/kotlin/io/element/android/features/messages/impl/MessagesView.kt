@@ -418,7 +418,10 @@ fun MessagesView(
 
     customReactionBottomSheet()
 
-    ReactionSummaryView(state = state.reactionSummaryState)
+    ReactionSummaryView(
+        state = state.reactionSummaryState,
+        onUserDataClick = onUserDataClick,
+    )
     ReadReceiptBottomSheet(
         state = state.readReceiptBottomSheetState,
         onUserDataClick = onUserDataClick,
