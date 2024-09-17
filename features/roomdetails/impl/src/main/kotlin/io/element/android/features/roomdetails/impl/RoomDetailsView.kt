@@ -198,7 +198,7 @@ fun RoomDetailsView(
                 }
             }
 
-            val displayMemberListItem = state.roomType is RoomDetailsType.Room
+            val displayMemberListItem = state.roomType is RoomDetailsType.Room || state.memberCount > 2
             if (displayMemberListItem) {
                 PreferenceCategory {
                     MembersItem(
