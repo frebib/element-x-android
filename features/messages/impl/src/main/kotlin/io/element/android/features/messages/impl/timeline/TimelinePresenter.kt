@@ -47,6 +47,7 @@ import io.element.android.features.roomcall.api.RoomCallState
 import io.element.android.libraries.androidutils.clipboard.ClipboardHelper
 import io.element.android.libraries.androidutils.toast.ToastHelper
 import io.element.android.libraries.architecture.Presenter
+import io.element.android.libraries.core.bool.orFalse
 import io.element.android.libraries.core.coroutine.CoroutineDispatchers
 import io.element.android.libraries.designsystem.utils.snackbar.SnackbarDispatcher
 import io.element.android.libraries.designsystem.utils.snackbar.SnackbarMessage
@@ -59,6 +60,7 @@ import io.element.android.libraries.matrix.api.core.asEventId
 import io.element.android.libraries.matrix.api.room.JoinedRoom
 import io.element.android.libraries.matrix.api.room.powerlevels.permissionsAsState
 import io.element.android.libraries.matrix.api.room.roomMembers
+import io.element.android.libraries.matrix.api.roomdirectory.RoomVisibility
 import io.element.android.libraries.matrix.api.timeline.ReceiptType
 import io.element.android.libraries.matrix.api.timeline.Timeline
 import io.element.android.libraries.matrix.api.timeline.item.event.LocalEventSendState
@@ -502,6 +504,7 @@ class TimelinePresenter(
                     currentUserId = room.sessionId,
                     name = roomInfo.name,
                     isDm = roomInfo.isDm,
+                    isPublic = room.info().isPublic.orFalse(),
                     renderReadReceipts = renderReadReceipts,
                     userHasPermissionToSendMessage = userEventPermissions.canSendMessage,
                     userHasPermissionToSendReaction = userEventPermissions.canSendReaction,
