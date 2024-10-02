@@ -234,6 +234,7 @@ class TimelinePresenter @AssistedInject constructor(
                 TimelineRoomInfo(
                     name = room.displayName,
                     isDm = room.isDm,
+                    isPublic = room.isPublic,
                     userHasPermissionToSendMessage = userHasPermissionToSendMessage,
                     userHasPermissionToSendReaction = userHasPermissionToSendReaction,
                     isCallOngoing = roomInfo?.hasRoomCall.orFalse(),

@@ -85,6 +85,7 @@ class PinnedMessagesListPresenter @AssistedInject constructor(
         val timelineRoomInfo = remember {
             TimelineRoomInfo(
                 isDm = room.isDm,
+                isPublic = room.isPublic,
                 name = room.displayName,
                 // We don't need to compute those values
                 userHasPermissionToSendMessage = false,

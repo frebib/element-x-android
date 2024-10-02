@@ -241,11 +241,13 @@ internal fun aGroupedEvents(
 internal fun aTimelineRoomInfo(
     name: String = "Room name",
     isDm: Boolean = false,
+    isPublic: Boolean = false,
     userHasPermissionToSendMessage: Boolean = true,
     pinnedEventIds: List<EventId> = emptyList(),
     typingNotificationState: TypingNotificationState = aTypingNotificationState(),
 ) = TimelineRoomInfo(
     isDm = isDm,
+    isPublic = isPublic,
     name = name,
     userHasPermissionToSendMessage = userHasPermissionToSendMessage,
     userHasPermissionToSendReaction = true,

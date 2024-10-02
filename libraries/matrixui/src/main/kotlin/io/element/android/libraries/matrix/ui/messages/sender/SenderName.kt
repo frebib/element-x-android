@@ -31,6 +31,7 @@ fun SenderName(
     senderId: UserId,
     senderProfile: ProfileTimelineDetails,
     senderNameMode: SenderNameMode,
+    disambiguateUser: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -50,7 +51,7 @@ fun SenderName(
                     MainText(text = senderId.value, mode = senderNameMode)
                 } else {
                     MainText(text = displayName, mode = senderNameMode)
-                    if (senderProfile.displayNameAmbiguous) {
+                    if (disambiguateUser || senderProfile.displayNameAmbiguous) {
                         SecondaryText(text = senderId.value, mode = senderNameMode)
                     }
                 }
