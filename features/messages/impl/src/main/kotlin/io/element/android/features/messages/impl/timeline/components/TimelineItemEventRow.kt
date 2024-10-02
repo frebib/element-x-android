@@ -506,6 +506,7 @@ private fun TimelineItemEventRowContent(
                 event.senderProfile,
                 event.senderAvatar,
                 onUserDataClick,
+                timelineRoomInfo.isPublic,
                 Modifier
                     .constrainAs(sender) {
                         top.linkTo(parent.top)
@@ -571,6 +572,7 @@ private fun TimelineItemEventRowContent(
                 inReplyToClick = inReplyToClick,
                 eventSink = eventSink,
                 eventContentView = eventContentView,
+                disambiguateUsers = timelineRoomInfo.isPublic,
             )
         }
 
@@ -631,6 +633,7 @@ private fun MessageSenderInformation(
     senderProfile: ProfileDetails,
     senderAvatar: AvatarData,
     onClick: () -> Unit,
+    disambiguateUser: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val avatarColors = AvatarColorsProvider.provide(senderAvatar.id)
@@ -659,6 +662,7 @@ private fun MessageSenderInformation(
             senderId = senderId,
             senderProfile = senderProfile,
             senderNameMode = SenderNameMode.Timeline(avatarColors.foreground),
+            disambiguateUser = disambiguateUser,
         )
     }
 }
@@ -672,6 +676,7 @@ private fun MessageEventBubbleContent(
     onMessageLongClick: () -> Unit,
     inReplyToClick: () -> Unit,
     eventSink: (TimelineEvent.TimelineItemEvent) -> Unit,
+    disambiguateUsers: Boolean = false,
     @SuppressLint("ModifierParameter")
     // need to rename this modifier to prevent linter false positives
     @Suppress("ModifierNaming")
@@ -794,6 +799,7 @@ private fun MessageEventBubbleContent(
         inReplyToDetails: InReplyToDetails?,
         modifier: Modifier = Modifier,
         canShrinkContent: Boolean = false,
+        disambiguateUsers: Boolean = false,
     ) {
         val timestampLayoutModifier =
             if (inReplyToDetails != null && timestampPosition == TimestampPosition.Overlay) {
@@ -940,6 +946,7 @@ private fun MessageEventBubbleContent(
         paddingBehaviour = paddingBehaviour,
         inReplyToDetails = event.inReplyTo,
         canShrinkContent = event.content is TimelineItemVoiceContent,
+        disambiguateUsers = disambiguateUsers,
         modifier = bubbleModifier,
     )
 }

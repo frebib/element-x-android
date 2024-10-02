@@ -41,6 +41,7 @@ import io.element.android.features.messages.impl.userEventPermissions
 import io.element.android.features.roomcall.api.aStandByCallState
 import io.element.android.libraries.architecture.AsyncData
 import io.element.android.libraries.architecture.Presenter
+import io.element.android.libraries.core.bool.orFalse
 import io.element.android.libraries.designsystem.utils.snackbar.SnackbarDispatcher
 import io.element.android.libraries.designsystem.utils.snackbar.SnackbarMessage
 import io.element.android.libraries.di.annotations.SessionCoroutineScope
@@ -108,6 +109,7 @@ class PinnedMessagesListPresenter(
             derivedStateOf {
                 TimelineRoomInfo(
                     isDm = roomInfo.isDm,
+                    isPublic = roomInfo.isPublic.orFalse(),
                     name = roomInfo.name,
                     // We don't need to compute those values
                     userHasPermissionToSendMessage = false,
