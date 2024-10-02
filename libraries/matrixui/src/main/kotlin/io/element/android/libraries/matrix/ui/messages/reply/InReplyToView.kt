@@ -60,6 +60,7 @@ fun InReplyToView(
     inReplyTo: InReplyToDetails,
     hideImage: Boolean,
     contentValidationValue: ContentValidationValue,
+    disambiguateUser: Boolean = false,
     modifier: Modifier = Modifier,
     maxLines: Int = 2,
 ) {
@@ -70,6 +71,7 @@ fun InReplyToView(
                 senderProfile = inReplyTo.senderProfile,
                 metadata = inReplyTo.metadata(hideImage),
                 maxLines = maxLines,
+                disambiguateUser = disambiguateUser,
                 modifier = modifier,
             )
             ContentValidationValue.Invalid -> ReplyToInvalidContent()
@@ -89,6 +91,7 @@ private fun ReplyToReadyContent(
     senderProfile: ProfileDetails,
     metadata: InReplyToMetadata?,
     maxLines: Int,
+    disambiguateUser: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val paddings = if (metadata is InReplyToMetadata.Thumbnail) {
@@ -120,6 +123,7 @@ private fun ReplyToReadyContent(
                 senderId = senderId,
                 senderProfile = senderProfile,
                 senderNameMode = SenderNameMode.Reply,
+                disambiguateUser = disambiguateUser,
                 modifier = Modifier.semantics {
                     contentDescription = a11InReplyToText
                     isTraversalGroup = true

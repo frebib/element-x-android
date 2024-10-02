@@ -81,6 +81,7 @@ sealed interface FocusRequestState {
 data class TimelineRoomInfo(
     val currentUserId: UserId,
     val isDm: Boolean,
+    val isPublic: Boolean,
     val name: String?,
     val userHasPermissionToSendMessage: Boolean,
     val userHasPermissionToSendReaction: Boolean,

@@ -282,6 +282,7 @@ internal fun aTimelineRoomInfo(
     currentUserId: UserId = UserId("@user:domain"),
     name: String = ROOM_NAME,
     isDm: Boolean = false,
+    isPublic: Boolean = false,
     userHasPermissionToSendMessage: Boolean = true,
     pinnedEventIds: List<EventId> = emptyList(),
     typingNotificationState: TypingNotificationState = aTypingNotificationState(),
@@ -289,6 +290,7 @@ internal fun aTimelineRoomInfo(
 ) = TimelineRoomInfo(
     currentUserId = currentUserId,
     isDm = isDm,
+    isPublic = isPublic,
     name = name,
     userHasPermissionToSendMessage = userHasPermissionToSendMessage,
     userHasPermissionToSendReaction = true,
