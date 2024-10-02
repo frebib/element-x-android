@@ -49,6 +49,7 @@ import io.element.android.libraries.ui.strings.CommonStrings
 fun InReplyToView(
     inReplyTo: InReplyToDetails,
     hideImage: Boolean,
+    disambiguateUser: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     when (inReplyTo) {
@@ -57,7 +58,8 @@ fun InReplyToView(
                 senderId = inReplyTo.senderId,
                 senderProfile = inReplyTo.senderProfile,
                 metadata = inReplyTo.metadata(hideImage),
-                modifier = modifier
+                disambiguateUser = disambiguateUser,
+                modifier = modifier,
             )
         }
         is InReplyToDetails.Error ->
@@ -72,6 +74,7 @@ private fun ReplyToReadyContent(
     senderId: UserId,
     senderProfile: ProfileTimelineDetails,
     metadata: InReplyToMetadata?,
+    disambiguateUser: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val paddings = if (metadata is InReplyToMetadata.Thumbnail) {
@@ -100,6 +103,7 @@ private fun ReplyToReadyContent(
                 senderId = senderId,
                 senderProfile = senderProfile,
                 senderNameMode = SenderNameMode.Reply,
+                disambiguateUser = disambiguateUser,
                 modifier = Modifier.semantics {
                     contentDescription = a11InReplyToText
                 },

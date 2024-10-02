@@ -299,8 +299,9 @@ private fun TimelineItemEventRowContent(
                 event.senderId,
                 event.senderProfile,
                 event.senderAvatar,
+                disambiguateUser = timelineRoomInfo.isPublic,
                 onUserDataClick = onUserDataClick,
-                Modifier
+                modifier = Modifier
                     .constrainAs(sender) {
                         top.linkTo(parent.top)
                         // Required for correct RTL layout
@@ -346,6 +347,7 @@ private fun TimelineItemEventRowContent(
                 inReplyToClick = inReplyToClick,
                 eventSink = eventSink,
                 eventContentView = eventContentView,
+                disambiguateUsers = timelineRoomInfo.isPublic,
             )
         }
 
@@ -406,6 +408,7 @@ private fun MessageSenderInformation(
     senderProfile: ProfileTimelineDetails,
     senderAvatar: AvatarData,
     onUserDataClick: () -> Unit,
+    disambiguateUser: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val avatarColors = AvatarColorsProvider.provide(senderAvatar.id)
@@ -420,6 +423,7 @@ private fun MessageSenderInformation(
             senderId = senderId,
             senderProfile = senderProfile,
             senderNameMode = SenderNameMode.Timeline(avatarColors.foreground),
+            disambiguateUser = disambiguateUser,
             modifier = Modifier
                 .clip(RoundedCornerShape(4.dp))
                 .clickable(onClick = onUserDataClick)
@@ -436,6 +440,7 @@ private fun MessageEventBubbleContent(
     onMessageLongClick: () -> Unit,
     inReplyToClick: () -> Unit,
     eventSink: (TimelineEvents.EventFromTimelineItem) -> Unit,
+    disambiguateUsers: Boolean = false,
     @SuppressLint("ModifierParameter")
     // need to rename this modifier to prevent linter false positives
     @Suppress("ModifierNaming")
@@ -535,6 +540,7 @@ private fun MessageEventBubbleContent(
         inReplyToDetails: InReplyToDetails?,
         modifier: Modifier = Modifier,
         canShrinkContent: Boolean = false,
+        disambiguateUsers: Boolean = false,
     ) {
         val timestampLayoutModifier: Modifier
         val contentModifier: Modifier
@@ -585,6 +591,7 @@ private fun MessageEventBubbleContent(
             InReplyToView(
                 inReplyTo = inReplyTo,
                 hideImage = timelineProtectionState.hideMediaContent(inReplyTo.eventId()),
+                disambiguateUser = disambiguateUsers,
                 modifier = inReplyToModifier,
             )
         }
@@ -616,6 +623,7 @@ private fun MessageEventBubbleContent(
         timestampPosition = timestampPosition,
         inReplyToDetails = event.inReplyTo,
         canShrinkContent = event.content is TimelineItemVoiceContent,
+        disambiguateUsers = disambiguateUsers,
         modifier = bubbleModifier.semantics(mergeDescendants = true) {
             contentDescription = event.safeSenderName
         }
