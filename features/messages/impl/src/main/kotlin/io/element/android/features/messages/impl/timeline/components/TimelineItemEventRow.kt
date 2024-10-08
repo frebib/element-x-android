@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -537,33 +536,31 @@ private fun MessageEventBubbleContent(
     fun CommonLayout(
         timestampPosition: TimestampPosition,
         showThreadDecoration: Boolean,
+        paddingBehaviour: ContentPadding,
         inReplyToDetails: InReplyToDetails?,
         modifier: Modifier = Modifier,
         canShrinkContent: Boolean = false,
         disambiguateUsers: Boolean = false,
     ) {
-        val timestampLayoutModifier: Modifier
-        val contentModifier: Modifier
-        when {
-            inReplyToDetails != null -> {
-                if (timestampPosition == TimestampPosition.Overlay) {
-                    timestampLayoutModifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
-                    contentModifier = Modifier.clip(RoundedCornerShape(12.dp))
-                } else {
-                    contentModifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 0.dp, bottom = 8.dp)
-                    timestampLayoutModifier = Modifier
-                }
+        val timestampLayoutModifier =
+            if (inReplyToDetails != null && timestampPosition == TimestampPosition.Overlay) {
+                Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+            } else {
+                Modifier
             }
-            timestampPosition != TimestampPosition.Overlay -> {
-                timestampLayoutModifier = Modifier
-                contentModifier = Modifier
-                    .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 8.dp)
+
+        val topPadding = if (inReplyToDetails != null) 0.dp else 8.dp
+        val contentModifier = when (paddingBehaviour) {
+            ContentPadding.Textual ->
+                Modifier.padding(start = 12.dp, end = 12.dp, top = topPadding, bottom = 8.dp)
+            ContentPadding.Media -> {
+                if (inReplyToDetails == null) Modifier
+                else Modifier.clip(RoundedCornerShape(10.dp))
             }
-            else -> {
-                timestampLayoutModifier = Modifier
-                contentModifier = Modifier
-            }
+            ContentPadding.CaptionedMedia ->
+                Modifier.padding(start = 8.dp, end = 8.dp, top = topPadding, bottom = 8.dp)
         }
+
         val threadDecoration = @Composable {
             if (showThreadDecoration) {
                 ThreadDecoration(modifier = Modifier.padding(top = 8.dp, start = 12.dp, end = 12.dp))
@@ -618,9 +615,17 @@ private fun MessageEventBubbleContent(
         is TimelineItemPollContent -> TimestampPosition.Below
         else -> TimestampPosition.Default
     }
+    val paddingBehaviour = when (event.content) {
+        is TimelineItemImageContent -> if (event.content.showCaption) ContentPadding.CaptionedMedia else ContentPadding.Media
+        is TimelineItemVideoContent -> if (event.content.showCaption) ContentPadding.CaptionedMedia else ContentPadding.Media
+        is TimelineItemStickerContent,
+        is TimelineItemLocationContent -> ContentPadding.Media
+        else -> ContentPadding.Textual
+    }
     CommonLayout(
         showThreadDecoration = event.isThreaded,
         timestampPosition = timestampPosition,
+        paddingBehaviour = paddingBehaviour,
         inReplyToDetails = event.inReplyTo,
         canShrinkContent = event.content is TimelineItemVoiceContent,
         disambiguateUsers = disambiguateUsers,
