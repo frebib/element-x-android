@@ -12,11 +12,5 @@ import java.io.Serializable
 
 @JvmInline
 value class RoomId(val value: String) : Serializable {
-    init {
-        if (isInDebug && !MatrixPatterns.isRoomId(value)) {
-            error("`$value` is not a valid room id.\n Example room id: `!room_id:domain`.")
-        }
-    }
-
     override fun toString(): String = value
 }
