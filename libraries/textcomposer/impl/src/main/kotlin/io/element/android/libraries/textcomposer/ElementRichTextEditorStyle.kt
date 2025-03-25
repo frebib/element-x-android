@@ -26,11 +26,7 @@ object ElementRichTextEditorStyle {
         val baseStyle = common()
         return baseStyle.copy(
             text = baseStyle.text.copy(
-                color = if (hasFocus) {
-                    ElementTheme.colors.textPrimary
-                } else {
-                    ElementTheme.colors.textSecondary
-                },
+                color = ElementTheme.colors.textPrimary,
                 placeholderColor = ElementTheme.colors.textSecondary,
                 lineHeight = TextUnit.Unspecified,
                 includeFontPadding = true,
