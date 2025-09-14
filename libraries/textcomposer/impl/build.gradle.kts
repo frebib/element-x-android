@@ -34,6 +34,8 @@ dependencies {
     implementation(projects.libraries.testtags)
     implementation(projects.libraries.uiUtils)
     implementation(projects.libraries.slashcommands.api)
+    // TODO: remove this dependency, we should not use the service directly
+    implementation(libs.matrix.emojibase.bindings)
 
     releaseApi(libs.matrix.richtexteditor)
     releaseApi(libs.matrix.richtexteditor.compose)
