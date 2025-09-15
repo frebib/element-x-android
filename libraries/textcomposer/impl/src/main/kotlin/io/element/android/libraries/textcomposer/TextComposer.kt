@@ -222,6 +222,7 @@ fun TextComposer(
                         onReceiveSuggestion = onReceiveSuggestion,
                         richTextEditorStyle = style,
                         onSelectRichContent = onSelectRichContent,
+                        skinTone = state.skinTone,
                     )
                 }
             }
