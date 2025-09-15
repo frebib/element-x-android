@@ -18,6 +18,7 @@ sealed interface TextEditorState {
 
     data class Markdown(
         val state: MarkdownTextEditorState,
+        val skinTone: String?,
         override val isRoomEncrypted: Boolean?,
     ) : TextEditorState
 

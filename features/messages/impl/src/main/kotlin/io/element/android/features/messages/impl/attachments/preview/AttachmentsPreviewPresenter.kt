@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -47,6 +48,7 @@ import io.element.android.libraries.mediaupload.api.MediaOptimizationConfigProvi
 import io.element.android.libraries.mediaupload.api.MediaSenderFactory
 import io.element.android.libraries.mediaupload.api.MediaUploadInfo
 import io.element.android.libraries.mediaupload.api.allFiles
+import io.element.android.libraries.preferences.api.store.SessionPreferencesStore
 import io.element.android.libraries.preferences.api.store.VideoCompressionPreset
 import io.element.android.libraries.textcomposer.model.TextEditorState
 import io.element.android.libraries.textcomposer.model.rememberMarkdownTextEditorState
@@ -72,6 +74,7 @@ class AttachmentsPreviewPresenter(
     private val attachmentImageEditor: AttachmentImageEditor,
     private val mediaOptimizationSelectorPresenterFactory: MediaOptimizationSelectorPresenter.Factory,
     private val videoCompressionPresetSelector: VideoCompressionPresetSelector,
+    private val sessionPreferencesStore: SessionPreferencesStore,
     @SessionCoroutineScope private val sessionCoroutineScope: CoroutineScope,
     private val dispatchers: CoroutineDispatchers,
     private val mediaOptimizationConfigProvider: MediaOptimizationConfigProvider,
@@ -105,10 +108,11 @@ class AttachmentsPreviewPresenter(
         var isApplyingImageEdits by remember { mutableStateOf(false) }
         var displayImageEditError by remember { mutableStateOf(false) }
         var editedTempFiles by remember { mutableStateOf<Map<Int, File>>(emptyMap()) }
+        val skinTone by sessionPreferencesStore.getSkinTone().collectAsState(initial = null)
 
         val markdownTextEditorState = rememberMarkdownTextEditorState(initialText = null, initialFocus = false)
         val textEditorState by rememberUpdatedState(
-            TextEditorState.Markdown(markdownTextEditorState, isRoomEncrypted = null)
+            TextEditorState.Markdown(markdownTextEditorState, skinTone, isRoomEncrypted = null)
         )
 
         val ongoingSendAttachmentJob = remember { mutableStateOf<Job?>(null) }

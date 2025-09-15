@@ -20,6 +20,7 @@ fun aTextEditorStateMarkdown(
             initialText = initialText,
             initialFocus = initialFocus,
         ),
+        null,
         isRoomEncrypted = isRoomEncrypted,
     )
 }
