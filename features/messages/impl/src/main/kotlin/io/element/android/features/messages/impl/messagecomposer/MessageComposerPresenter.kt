@@ -218,6 +218,7 @@ class MessageComposerPresenter(
         val sendTypingNotifications by remember {
             sessionPreferencesStore.isSendTypingNotificationsEnabled()
         }.collectAsState(initial = true)
+        val skinTone by sessionPreferencesStore.getSkinTone().collectAsState(initial = null)
 
         LaunchedEffect(cameraPermissionState.permissionGranted) {
             if (cameraPermissionState.permissionGranted) {
@@ -248,7 +249,11 @@ class MessageComposerPresenter(
             if (showTextFormatting) {
                 TextEditorState.Rich(richTextEditorState, roomInfo.isEncrypted == true)
             } else {
-                TextEditorState.Markdown(markdownTextEditorState, roomInfo.isEncrypted == true)
+                TextEditorState.Markdown(
+                    markdownTextEditorState,
+                    skinTone,
+                    roomInfo.isEncrypted == true,
+                )
             }
         )
 

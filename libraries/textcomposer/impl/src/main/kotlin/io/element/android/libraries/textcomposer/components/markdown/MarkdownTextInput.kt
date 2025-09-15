@@ -83,6 +83,7 @@ fun MarkdownTextInput(
     onReceiveSuggestion: (Suggestion?) -> Unit,
     richTextEditorStyle: RichTextEditorStyle,
     onSelectRichContent: ((Uri) -> Unit)?,
+    skinTone: String? = null,
 ) {
     // Copied from io.element.android.wysiwyg.internal.utils.UriContentListener
     class ReceiveUriContentListener(
@@ -147,7 +148,13 @@ fun MarkdownTextInput(
                         value = emojiBase.allEmojis
                             .filter { emoji -> emoji.shortcodes.any { it.startsWith(currentSuggestion.text) } }
                             .take(10)
-                            .map { it.unicode }
+                            .map { emoji ->
+                                if (skinTone != null) {
+                                    emoji.skins?.firstOrNull { skin -> skinTone in skin.unicode }?.unicode
+                                } else {
+                                    null
+                                }?: emoji.unicode
+                            }
                             .toPersistentList()
                     }
 
