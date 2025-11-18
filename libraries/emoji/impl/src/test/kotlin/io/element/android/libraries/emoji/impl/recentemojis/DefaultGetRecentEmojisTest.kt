@@ -10,6 +10,7 @@ package io.element.android.libraries.emoji.impl.recentemojis
 
 import com.google.common.truth.Truth.assertThat
 import io.element.android.emojibasebindings.Emoji
+import io.element.android.emojibasebindings.EmojiSkin
 import io.element.android.emojibasebindings.EmojibaseCategory
 import io.element.android.emojibasebindings.EmojibaseCategory.People
 import io.element.android.libraries.emoji.impl.fixtures.FakeEmojibaseProvider
@@ -38,24 +39,26 @@ class DefaultGetRecentEmojisTest {
 
     @Test
     fun `invoke - removes non-standard emojis`() = runTest {
-        val recentEmojiResult = persistentListOf(":)", ":D", "Custom reaction")
+        val recentEmojiResult = persistentListOf(":)", ":))", ":D", "Custom reaction")
         val getRecentEmojis = createDefaultGetRecentEmojis(
             recentEmojis = { Result.success(recentEmojiResult) },
             emojibaseContents = persistentMapOf(
-                People to persistentListOf(emoji(":)"), emoji(":D"))
+                People to persistentListOf(emoji(":)", skins=listOf(":))")), emoji(":D"))
             )
         )
 
-        assertThat(getRecentEmojis()).isEqualTo(Result.success(persistentListOf(":)", ":D")))
+        assertThat(getRecentEmojis()).isEqualTo(Result.success(persistentListOf(":)", ":))", ":D")))
     }
 
-    private fun emoji(unicode: String) = Emoji(
+    private fun emoji(unicode: String, skins: List<String>? = null) = Emoji(
         hexcode = "",
         label = "",
         tags = null,
         shortcodes = persistentListOf(),
         unicode = unicode,
-        skins = null,
+        skins = skins.orEmpty().map {
+            EmojiSkin(hexcode = "", label = "", unicode = it)
+        }.toImmutableList(),
     )
 
     private fun TestScope.createDefaultGetRecentEmojis(
