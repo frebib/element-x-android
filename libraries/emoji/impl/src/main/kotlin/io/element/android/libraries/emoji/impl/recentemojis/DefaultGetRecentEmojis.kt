@@ -9,6 +9,7 @@
 package io.element.android.libraries.emoji.impl.recentemojis
 
 import dev.zacsweers.metro.ContributesBinding
+import io.element.android.emojibasebindings.EmojiSkin
 import io.element.android.libraries.core.coroutine.CoroutineDispatchers
 import io.element.android.libraries.di.SessionScope
 import io.element.android.libraries.emoji.api.recentemojis.GetRecentEmojis
@@ -31,8 +32,11 @@ class DefaultGetRecentEmojis(
                 // Remove any possible duplicates
                 emojis.distinct()
                     // Return only those emojis that are valid
-                    .filter { recent -> allEmojis.any { recent == it.unicode } }
-                    .toImmutableList()
+                    .filter { recent ->
+                        allEmojis.any {
+                            recent == it.unicode || recent in it.skins.orEmpty() .map(EmojiSkin::unicode)
+                        }
+                    }.toImmutableList()
             }
     }
 }
