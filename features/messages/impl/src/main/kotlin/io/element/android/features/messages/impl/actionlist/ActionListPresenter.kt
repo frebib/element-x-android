@@ -51,6 +51,7 @@ import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.room.BaseRoom
 import io.element.android.libraries.matrix.api.timeline.Timeline
 import io.element.android.libraries.preferences.api.store.AppPreferencesStore
+import io.element.android.libraries.preferences.api.store.SessionPreferencesStore
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -74,6 +75,7 @@ class DefaultActionListPresenter(
     @Assisted
     private val timelineMode: Timeline.Mode,
     private val appPreferencesStore: AppPreferencesStore,
+    private val sessionPreferencesStore: SessionPreferencesStore,
     private val room: BaseRoom,
     private val userSendFailureFactory: VerifiedUserSendFailureFactory,
     private val dateFormatter: DateFormatter,
@@ -102,6 +104,7 @@ class DefaultActionListPresenter(
         val isDeveloperModeEnabled by remember {
             appPreferencesStore.isDeveloperModeEnabledFlow()
         }.collectAsState(initial = false)
+        val skinTone by sessionPreferencesStore.getSkinTone().collectAsState(initial = null)
         val pinnedEventIds by remember {
             room.roomInfoFlow.map { it.pinnedEventIds }
         }.collectAsState(initial = persistentListOf())
@@ -113,6 +116,7 @@ class DefaultActionListPresenter(
                 ActionListEvent.Clear -> target.value = ActionListState.Target.None
                 is ActionListEvent.ComputeForMessage -> localCoroutineScope.computeForMessage(
                     timelineItem = event.event,
+                    skinTone = skinTone,
                     usersEventPermissions = event.userEventPermissions,
                     isDeveloperModeEnabled = isDeveloperModeEnabled,
                     pinnedEventIds = pinnedEventIds,
@@ -131,6 +135,7 @@ class DefaultActionListPresenter(
     private fun CoroutineScope.computeForMessage(
         timelineItem: TimelineItem.Event,
         usersEventPermissions: UserEventPermissions,
+        skinTone: String?,
         isDeveloperModeEnabled: Boolean,
         pinnedEventIds: ImmutableList<EventId>,
         target: MutableState<ActionListState.Target>,
@@ -158,6 +163,7 @@ class DefaultActionListPresenter(
                     DateFormatterMode.Full,
                     useRelative = true,
                 ),
+                skinTone = skinTone,
                 displayEmojiReactions = displayEmojiReactions,
                 verifiedUserSendFailure = verifiedUserSendFailure,
                 actions = actions.toImmutableList(),

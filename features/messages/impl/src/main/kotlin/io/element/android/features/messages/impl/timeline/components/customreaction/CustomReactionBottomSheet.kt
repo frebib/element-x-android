@@ -71,6 +71,7 @@ fun CustomReactionBottomSheet(
                     state = state.target.emojiPickerState,
                     onSelectEmoji = ::onEmojiSelectedDismiss,
                     onSelectReaction = ::onReactionSelectedDismiss,
+                    skinTone = state.skinTone,
                     selectedEmojis = state.selectedEmoji,
                     modifier = Modifier.fillMaxSize(),
                     contentDescription = { emoji, isSelected ->

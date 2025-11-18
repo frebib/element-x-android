@@ -52,6 +52,9 @@ class AdvancedSettingsPresenter(
         val theme = remember(isBlackThemeAllowed) {
             appPreferencesStore.getThemeFlow().mapToTheme(isBlackThemeAllowed)
         }.collectAsState(initial = Theme.System)
+        val skinTone = remember {
+            sessionPreferencesStore.getSkinTone()
+        }.collectAsState(initial = null)
 
         val liveLocationMinimumDistanceUpdate by produceState<Int?>(null) {
             appPreferencesStore.getLiveLocationMinimumDistanceInMetersUpdateFlow().collect { value = it }
@@ -100,6 +103,12 @@ class AdvancedSettingsPresenter(
             }.collect()
         }
 
+        val skinToneOption by remember {
+            derivedStateOf {
+                SkinToneOption.fromUnicode(skinTone.value)
+            }
+        }
+
         fun handleEvent(event: AdvancedSettingsEvent) {
             when (event) {
                 is AdvancedSettingsEvent.SetDeveloperModeEnabled -> sessionCoroutineScope.launch {
@@ -118,6 +127,9 @@ class AdvancedSettingsPresenter(
                         ThemeOption.Black -> appPreferencesStore.setTheme(Theme.Black.name)
                         ThemeOption.Light -> appPreferencesStore.setTheme(Theme.Light.name)
                     }
+                }
+                is AdvancedSettingsEvent.SetSkinTone -> sessionCoroutineScope.launch {
+                    sessionPreferencesStore.setSkinTone(event.tone.unicode)
                 }
                 is AdvancedSettingsEvent.SetHideInviteAvatars -> mediaPreviewConfigStateStore.setHideInviteAvatars(event.value)
                 is AdvancedSettingsEvent.SetTimelineMediaPreviewValue -> mediaPreviewConfigStateStore.setTimelineMediaPreviewValue(event.value)
@@ -139,6 +151,7 @@ class AdvancedSettingsPresenter(
             mediaOptimizationState = mediaOptimizationState,
             theme = themeOption,
             availableThemeOptions = availableThemeOptions,
+            skinTone = skinToneOption,
             mediaPreviewConfigState = mediaPreviewConfigState,
             liveLocationMinimumDistanceUpdate = liveLocationMinimumDistanceUpdate,
             eventSink = ::handleEvent,

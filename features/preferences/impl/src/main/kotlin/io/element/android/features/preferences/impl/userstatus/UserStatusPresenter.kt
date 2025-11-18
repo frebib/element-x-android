@@ -24,11 +24,13 @@ import io.element.android.libraries.architecture.runUpdatingState
 import io.element.android.libraries.emoji.api.picker.EmojiPickerPresenter
 import io.element.android.libraries.emoji.api.recentemojis.EmptyGetRecentEmojis
 import io.element.android.libraries.matrix.api.MatrixClient
+import io.element.android.libraries.preferences.api.store.SessionPreferencesStore
 import kotlinx.coroutines.launch
 
 @Inject
 class UserStatusPresenter(
     private val matrixClient: MatrixClient,
+    private val sessionPreferencesStore: SessionPreferencesStore,
     emojiPickerPresenterFactory: EmojiPickerPresenter.Factory,
 ) : Presenter<UserStatusState> {
     private val emojiPickerPresenter = emojiPickerPresenterFactory.create(EmptyGetRecentEmojis)
@@ -41,6 +43,7 @@ class UserStatusPresenter(
         val customTextFieldState = rememberTextFieldState()
         val coroutineScope = rememberCoroutineScope()
         val updateStatusAction = remember { mutableStateOf<AsyncAction<Unit>>(AsyncAction.Uninitialized) }
+        val skinTone = sessionPreferencesStore.getSkinTone().collectAsState(initial = null)
 
         fun handleEvent(event: UserStatusEvent) {
             when (event) {
@@ -101,6 +104,7 @@ class UserStatusPresenter(
             rawStatus = userProfile.rawStatus,
             pickerState = effectivePickerState,
             updateStatusAction = updateStatusAction.value,
+            skinTone = skinTone.value,
             eventSink = ::handleEvent,
         )
     }

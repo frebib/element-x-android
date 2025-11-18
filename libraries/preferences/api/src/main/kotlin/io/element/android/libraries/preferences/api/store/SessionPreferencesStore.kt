@@ -81,6 +81,10 @@ interface SessionPreferencesStore {
     /** The video compression preset; defaults to [VideoCompressionPreset.STANDARD], including when the stored value is unreadable. */
     fun getVideoCompressionPreset(): Flow<VideoCompressionPreset>
 
+    /** Preferred skin tone */
+    suspend fun setSkinTone(modifier: String?)
+    fun getSkinTone(): Flow<String?>
+
     /** Erases every preference of this session, so they all fall back to their defaults. */
     suspend fun clear()
 }

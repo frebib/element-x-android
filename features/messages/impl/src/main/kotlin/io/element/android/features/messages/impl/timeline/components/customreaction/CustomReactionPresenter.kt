@@ -9,6 +9,7 @@
 package io.element.android.features.messages.impl.timeline.components.customreaction
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,18 +19,21 @@ import io.element.android.features.messages.impl.timeline.model.TimelineItem
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.emoji.api.picker.EmojiPickerPresenter
 import io.element.android.libraries.emoji.api.recentemojis.GetRecentEmojis
+import io.element.android.libraries.preferences.api.store.SessionPreferencesStore
 import kotlinx.collections.immutable.toImmutableSet
 
 @Inject
 class CustomReactionPresenter(
     emojiPickerPresenterFactory: EmojiPickerPresenter.Factory,
     getRecentEmojis: GetRecentEmojis,
+    private val sessionPreferencesStore: SessionPreferencesStore,
 ) : Presenter<CustomReactionState> {
     private val emojiPickerPresenter = emojiPickerPresenterFactory.create(getRecentEmojis)
     @Composable
     override fun present(): CustomReactionState {
         var internalTarget by remember { mutableStateOf<InternalTarget>(InternalTarget.None) }
         val emojiPickerState = emojiPickerPresenter.present()
+        val skinTone by sessionPreferencesStore.getSkinTone().collectAsState(initial = null)
 
         fun handleEvent(event: CustomReactionEvent) {
             when (event) {
@@ -66,6 +70,7 @@ class CustomReactionPresenter(
             target = computedTarget,
             selectedEmoji = selectedEmoji,
             eventSink = ::handleEvent,
+            skinTone = skinTone,
         )
     }
 }

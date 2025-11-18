@@ -61,6 +61,7 @@ internal fun EmojiPickerView(
     state: DefaultEmojiPickerState,
     onSelectEmoji: (Emoji) -> Unit,
     selectedEmojis: ImmutableSet<String>,
+    skinTone: String?,
     modifier: Modifier = Modifier,
     onSelectReaction: ((String) -> Unit)? = null,
     contentDescription: @Composable (emoji: Emoji, isSelected: Boolean) -> String = { emoji, _ -> emoji.unicode },
@@ -96,6 +97,7 @@ internal fun EmojiPickerView(
                 skinPickerEmoji = skinPickerEmoji,
                 onDismissSkinPicker = { skinPickerEmoji = null },
                 selectedEmojis = selectedEmojis,
+                skinTone = skinTone,
                 contentDescription = contentDescription,
             )
         }
@@ -139,6 +141,7 @@ internal fun EmojiPickerView(
                     skinPickerEmoji = skinPickerEmoji,
                     onDismissSkinPicker = { skinPickerEmoji = null },
                     selectedEmojis = selectedEmojis,
+                    skinTone = skinTone,
                     contentDescription = contentDescription,
                 )
             }
@@ -155,6 +158,7 @@ private fun EmojiResults(
     skinPickerEmoji: Emoji?,
     onDismissSkinPicker: () -> Unit,
     selectedEmojis: ImmutableSet<String>,
+    skinTone: String? = null,
     contentDescription: @Composable (emoji: Emoji, isSelected: Boolean) -> String,
 ) {
     LazyVerticalGrid(
@@ -165,17 +169,21 @@ private fun EmojiResults(
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         items(emojis, key = { it.unicode }) { item ->
+            val emoji = if (skinTone != null) {
+                val variant = item.skins?.firstOrNull { skin -> skinTone in skin.unicode }
+                item.copy(unicode = variant?.unicode ?: item.unicode)
+            } else item
             EmojiItem(
                 modifier = Modifier.aspectRatio(1f),
-                item = item,
-                isSelected = isEmojiSelected(item),
+                item = emoji,
+                isSelected = isEmojiSelected(emoji),
                 onSelectEmoji = onSelectEmoji,
                 onLongPress = onLongPress,
                 skinPickerEmoji = skinPickerEmoji,
                 onDismissSkinPicker = onDismissSkinPicker,
                 emojiSize = 32.dp.toSp(),
                 selectedSkinUnicodes = selectedEmojis,
-                hasSelectedSkin = item.skins?.any { skin -> skin.unicode in selectedEmojis } == true,
+                hasSelectedSkin = emoji.skins?.any { skin -> skin.unicode in selectedEmojis } == true,
                 contentDescription = contentDescription,
             )
         }
@@ -216,6 +224,7 @@ internal fun EmojiPickerViewPreview(@PreviewParameter(DefaultEmojiPickerStatePre
         onSelectEmoji = {},
         onSelectReaction = {},
         selectedEmojis = persistentSetOf("😀", "😄", "😃"),
+        skinTone = null,
         modifier = Modifier.fillMaxWidth(),
     )
 }

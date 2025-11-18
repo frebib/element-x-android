@@ -22,6 +22,7 @@ open class AdvancedSettingsStatePreviewParam : PreviewParameterProvider<Advanced
             aAdvancedSettingsState(isDeveloperModeEnabled = true),
             aAdvancedSettingsState(isSharePresenceEnabled = true),
             aAdvancedSettingsState(mediaOptimizationState = MediaOptimizationState.AllMedia(isEnabled = true)),
+            aAdvancedSettingsState(skinTone = SkinToneOption.Medium),
             aAdvancedSettingsState(hideInviteAvatars = true),
             aAdvancedSettingsState(timelineMediaPreviewValue = MediaPreviewValue.Off),
             aAdvancedSettingsState(setHideInviteAvatarsAction = AsyncAction.Loading),
@@ -39,6 +40,7 @@ fun aAdvancedSettingsState(
     mediaOptimizationState: MediaOptimizationState = MediaOptimizationState.AllMedia(isEnabled = false),
     theme: ThemeOption = ThemeOption.System,
     availableThemeOptions: ImmutableList<ThemeOption> = ThemeOption.entries.toImmutableList(),
+    skinTone: SkinToneOption = SkinToneOption.None,
     hideInviteAvatars: Boolean = false,
     timelineMediaPreviewValue: MediaPreviewValue = MediaPreviewValue.On,
     liveLocationMinimumDistanceUpdate: Int? = 50,
@@ -51,6 +53,7 @@ fun aAdvancedSettingsState(
     mediaOptimizationState = mediaOptimizationState,
     theme = theme,
     availableThemeOptions = availableThemeOptions,
+    skinTone = skinTone,
     mediaPreviewConfigState = MediaPreviewConfigState(
         hideInviteAvatars = hideInviteAvatars,
         timelineMediaPreviewValue = timelineMediaPreviewValue,

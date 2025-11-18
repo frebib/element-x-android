@@ -25,6 +25,7 @@ data class ActionListState(
         data class Success(
             val event: TimelineItem.Event,
             val sentTimeFull: String,
+            val skinTone: String? = null,
             val displayEmojiReactions: Boolean,
             val recentEmojis: ImmutableList<String>,
             val verifiedUserSendFailure: VerifiedUserSendFailure,

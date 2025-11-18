@@ -26,6 +26,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import im.vector.app.features.analytics.plan.Interaction
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.features.preferences.impl.R
@@ -58,6 +59,7 @@ import io.element.android.libraries.preferences.api.store.VideoCompressionPreset
 import io.element.android.libraries.ui.strings.CommonStrings
 import io.element.android.services.analytics.compose.LocalAnalyticsService
 import io.element.android.services.analyticsproviders.api.trackers.captureInteraction
+import kotlinx.collections.immutable.toImmutableList
 import kotlin.math.roundToInt
 
 @Composable
@@ -201,6 +203,17 @@ fun AdvancedSettingsView(
                 }
             }
         }
+
+        PreferenceDropdown(
+            title = stringResource(id = R.string.screen_advanced_settings_skin_tone),
+            supportingText = stringResource(R.string.screen_advanced_settings_skin_tone_description),
+            selectedOption = state.skinTone,
+            selectedStyle = ElementTheme.typography.fontBodyMdRegular.copy(fontSize = 28.sp),
+            options = SkinToneOption.entries.toImmutableList(),
+            onSelectOption = {
+                state.eventSink(AdvancedSettingsEvent.SetSkinTone(it))
+            }
+        )
 
         ModerationAndSafety(state)
         if (state.liveLocationMinimumDistanceUpdate != null) {

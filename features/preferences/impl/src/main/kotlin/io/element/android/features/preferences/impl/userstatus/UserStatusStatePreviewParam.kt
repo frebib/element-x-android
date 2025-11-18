@@ -46,11 +46,13 @@ fun aUserStatusState(
     rawStatus: UserStatus? = null,
     pickerState: UserStatusPickerState = UserStatusPickerState.Hidden,
     updateStatusAction: AsyncAction<Unit> = AsyncAction.Uninitialized,
+    skinTone: String? = null,
     eventSink: (UserStatusEvent) -> Unit = {},
 ) = UserStatusState(
     displayedStatus = displayedStatus,
     rawStatus = rawStatus,
     pickerState = pickerState,
     updateStatusAction = updateStatusAction,
+    skinTone = skinTone,
     eventSink = eventSink,
 )
