@@ -91,8 +91,6 @@ class DefaultActionListPresenter(
 
     private val comparator = TimelineItemActionComparator()
 
-    private val suggestedEmojis = persistentListOf("👍️", "👎️", "🔥", "❤️", "👏")
-
     @Composable
     override fun present(): ActionListState {
         val localCoroutineScope = rememberCoroutineScope()
@@ -164,7 +162,7 @@ class DefaultActionListPresenter(
                 verifiedUserSendFailure = verifiedUserSendFailure,
                 actions = actions.toImmutableList(),
                 // Merge suggested and recent emojis, removing duplicates and returning at most 100
-                recentEmojis = (suggestedEmojis + recentEmojis).distinct()
+                recentEmojis = (recentEmojis).distinct()
                     .take(100)
                     .toImmutableList()
             )
