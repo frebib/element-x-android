@@ -94,6 +94,9 @@ class PreferencesRootPresenter(
         val theme = remember(isBlackThemeAllowed) {
             appPreferencesStore.getThemeFlow().mapToTheme(isBlackThemeAllowed)
         }.collectAsState(initial = Theme.System)
+        val skinTone = remember {
+            appPreferencesStore.getSkinTone()
+        }.collectAsState(initial = null)
 
         val otherSessions by remember {
             sessionStore.sessionsFlow()
@@ -128,6 +131,12 @@ class PreferencesRootPresenter(
             }.toImmutableList()
         }
 
+        val skinToneOption by remember {
+            derivedStateOf {
+                SkinToneOption.fromUnicode(skinTone.value)
+            }
+        }
+
         val snackbarMessage by snackbarDispatcher.collectSnackbarMessageAsState()
         val hasAnalyticsProviders = remember { analyticsService.getAvailableAnalyticsProviders().isNotEmpty() }
 
@@ -153,6 +162,9 @@ class PreferencesRootPresenter(
                         ThemeOption.Light -> appPreferencesStore.setTheme(Theme.Light.name)
                     }
                 }
+                is PreferencesRootEvent.SetSkinTone -> sessionCoroutineScope.launch {
+                    appPreferencesStore.setSkinTone(event.skinTone.unicode)
+                }
             }
         }
 
@@ -161,6 +173,7 @@ class PreferencesRootPresenter(
             userStatusState = userStatusState,
             preferencesAccountState = preferencesAccountState,
             theme = themeOption,
+            skinTone = skinToneOption,
             availableThemeOptions = availableThemeOptions,
             version = remember { versionFormatter.get() },
             isMultiAccountEnabled = isMultiAccountEnabled,

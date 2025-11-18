@@ -21,6 +21,7 @@ data class UserStatusState(
     val rawStatus: UserStatus?,
     val pickerState: UserStatusPickerState,
     val updateStatusAction: AsyncAction<Unit>,
+    val skinTone: String?,
     val eventSink: (UserStatusEvent) -> Unit,
 )
 

@@ -43,6 +43,7 @@ open class ActionListStatePreviewParam : PreviewParameterProvider<ActionListStat
                             timelineItemReactions = reactionsState
                         ),
                         sentTimeFull = "January 1, 1970 at 12:00 AM",
+                        skinTone = "🏽",
                         displayEmojiReactions = true,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemActionList(),
@@ -57,6 +58,7 @@ open class ActionListStatePreviewParam : PreviewParameterProvider<ActionListStat
                             timelineItemReactions = reactionsState,
                         ),
                         sentTimeFull = "January 1, 1970 at 12:00 AM",
+                        skinTone = "🏽",
                         displayEmojiReactions = true,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemActionList(
@@ -72,6 +74,7 @@ open class ActionListStatePreviewParam : PreviewParameterProvider<ActionListStat
                             timelineItemReactions = reactionsState
                         ),
                         sentTimeFull = "January 1, 1970 at 12:00 AM",
+                        skinTone = "🏽",
                         displayEmojiReactions = true,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemActionList(
@@ -87,6 +90,7 @@ open class ActionListStatePreviewParam : PreviewParameterProvider<ActionListStat
                             timelineItemReactions = reactionsState
                         ),
                         sentTimeFull = "January 1, 1970 at 12:00 AM",
+                        skinTone = "🏽",
                         displayEmojiReactions = true,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemActionList(
@@ -102,6 +106,7 @@ open class ActionListStatePreviewParam : PreviewParameterProvider<ActionListStat
                             timelineItemReactions = reactionsState
                         ),
                         sentTimeFull = "January 1, 1970 at 12:00 AM",
+                        skinTone = "🏽",
                         displayEmojiReactions = true,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemActionList(
@@ -117,6 +122,7 @@ open class ActionListStatePreviewParam : PreviewParameterProvider<ActionListStat
                             timelineItemReactions = reactionsState
                         ),
                         sentTimeFull = "January 1, 1970 at 12:00 AM",
+                        skinTone = "🏽",
                         displayEmojiReactions = true,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemActionList(
@@ -132,6 +138,7 @@ open class ActionListStatePreviewParam : PreviewParameterProvider<ActionListStat
                             timelineItemReactions = reactionsState
                         ),
                         sentTimeFull = "January 1, 1970 at 12:00 AM",
+                        skinTone = "🏽",
                         displayEmojiReactions = true,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemActionList(),
@@ -145,6 +152,7 @@ open class ActionListStatePreviewParam : PreviewParameterProvider<ActionListStat
                             timelineItemReactions = reactionsState
                         ),
                         sentTimeFull = "January 1, 1970 at 12:00 AM",
+                        skinTone = "🏽",
                         displayEmojiReactions = false,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemActionList(),
@@ -158,6 +166,7 @@ open class ActionListStatePreviewParam : PreviewParameterProvider<ActionListStat
                             timelineItemReactions = reactionsState
                         ),
                         sentTimeFull = "January 1, 1970 at 12:00 AM",
+                        skinTone = "🏽",
                         displayEmojiReactions = false,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemPollActionList(),
@@ -171,6 +180,7 @@ open class ActionListStatePreviewParam : PreviewParameterProvider<ActionListStat
                             messageShield = MessageShield.UnknownDevice(isCritical = true)
                         ),
                         sentTimeFull = "January 1, 1970 at 12:00 AM",
+                        skinTone = "🏽",
                         displayEmojiReactions = true,
                         verifiedUserSendFailure = VerifiedUserSendFailure.None,
                         actions = aTimelineItemActionList(),

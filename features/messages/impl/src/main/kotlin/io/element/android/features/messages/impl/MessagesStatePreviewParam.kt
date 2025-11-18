@@ -204,6 +204,7 @@ fun aCustomReactionState(
 ) = CustomReactionState(
     target = target,
     selectedEmoji = persistentSetOf(),
+    skinTone = null,
     eventSink = eventSink,
 )
 

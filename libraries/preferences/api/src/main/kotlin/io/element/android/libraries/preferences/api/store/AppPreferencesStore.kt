@@ -44,6 +44,10 @@ interface AppPreferencesStore {
     /** The name of the chosen theme, or `null` when the user has not picked one and the system setting should be followed. */
     fun getThemeFlow(): Flow<String?>
 
+    /** Preferred skin tone */
+    suspend fun setSkinTone(modifier: String?)
+    fun getSkinTone(): Flow<String?>
+
     /**
      * @param expanded true to expand the other accounts section.
      */

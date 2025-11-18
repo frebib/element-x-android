@@ -13,6 +13,8 @@ import com.sigpwned.emoji4j.core.Grapheme.Type.PICTOGRAPHIC
 import com.sigpwned.emoji4j.core.GraphemeMatchResult
 import com.sigpwned.emoji4j.core.GraphemeMatcher
 
+val SKIN_MODIFIERS = setOf("🏻", "🏼", "🏽", "🏾", "🏿")
+
 /**
  * Returns true if the string consists exclusively of "emoji or pictographic graphemes".
  */
