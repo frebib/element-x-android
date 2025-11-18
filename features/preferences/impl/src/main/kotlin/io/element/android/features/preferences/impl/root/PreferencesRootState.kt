@@ -24,6 +24,7 @@ data class PreferencesRootState(
     val theme: ThemeOption,
     val preferencesAccountState: PreferencesAccountState,
     val availableThemeOptions: ImmutableList<ThemeOption>,
+    val skinTone: SkinToneOption,
     val userStatusState: UserStatusState?,
     val version: String,
     val isMultiAccountEnabled: Boolean,
@@ -59,5 +60,49 @@ enum class ThemeOption : DropdownOption {
         @Composable
         @ReadOnlyComposable
         override fun getText(): String = stringResource(R.string.theme_black)
+    }
+}
+
+enum class SkinToneOption(val unicode: String) : DropdownOption {
+    None("") {
+        @Composable
+        override fun getText(): String = "${preview()} No modifier"
+    },
+    Light("🏻") {
+        @Composable
+        override fun getText(): String = "${preview()} Light skin tone"
+    },
+    MediumLight("🏼") {
+        @Composable
+        override fun getText(): String = "${preview()} Medium-Light skin tone"
+    },
+    Medium("🏽") {
+        @Composable
+        override fun getText(): String = "${preview()} Medium skin tone"
+    },
+    MediumDark("🏾") {
+        @Composable
+        override fun getText(): String = "${preview()} Medium-Dark skin tone"
+    },
+    Dark("🏿") {
+        @Composable
+        override fun getText(): String = "${preview()} Dark skin tone"
+    };
+
+    fun preview(): String = "👋$unicode 🧑$unicode 🏃$unicode"
+
+    @Composable
+    override fun getSummary(): String? = "👋$unicode"
+
+    companion object {
+        fun fromUnicode(value: String?): SkinToneOption =
+            when (value) {
+                "🏻" -> Light
+                "🏼" -> MediumLight
+                "🏽" -> Medium
+                "🏾" -> MediumDark
+                "🏿" -> Dark
+                else -> None
+            }
     }
 }

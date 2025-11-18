@@ -15,4 +15,5 @@ sealed interface PreferencesRootEvent {
     data class SwitchToSession(val sessionId: SessionId) : PreferencesRootEvent
     data object ToggleOtherAccountsExpanded : PreferencesRootEvent
     data class SetTheme(val theme: ThemeOption) : PreferencesRootEvent
+    data class SetSkinTone(val skinTone: SkinToneOption) : PreferencesRootEvent
 }

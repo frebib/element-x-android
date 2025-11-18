@@ -34,6 +34,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.features.preferences.impl.R
@@ -318,6 +319,16 @@ private fun AppSettingsSection(
             options = state.availableThemeOptions,
             onSelectOption = { themeOption ->
                 state.eventSink(PreferencesRootEvent.SetTheme(themeOption))
+            }
+        )
+        PreferenceDropdown(
+            title = stringResource(id = R.string.screen_advanced_settings_skin_tone),
+            supportingText = stringResource(R.string.screen_advanced_settings_skin_tone_description),
+            selectedOption = state.skinTone,
+            selectedStyle = ElementTheme.typography.fontBodyMdRegular.copy(fontSize = 28.sp),
+            options = SkinToneOption.entries.toImmutableList(),
+            onSelectOption = {
+                state.eventSink(PreferencesRootEvent.SetSkinTone(it))
             }
         )
         ListItem(

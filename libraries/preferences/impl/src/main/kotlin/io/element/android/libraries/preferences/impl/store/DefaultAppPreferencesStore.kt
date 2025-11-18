@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.map
 private val developerModeKey = booleanPreferencesKey("developerMode")
 private val customElementCallBaseUrlKey = stringPreferencesKey("elementCallBaseUrl")
 private val themeKey = stringPreferencesKey("theme")
+private val skinToneKey = stringPreferencesKey("skinTone")
 private val hideInviteAvatarsKey = booleanPreferencesKey("hideInviteAvatars")
 private val otherAccountsExpandedKey = booleanPreferencesKey("otherAccountsExpanded")
 private val timelineMediaPreviewValueKey = stringPreferencesKey("timelineMediaPreviewValue")
@@ -95,6 +96,18 @@ class DefaultAppPreferencesStore(
     override fun getThemeFlow(): Flow<String?> {
         return store.data.map { prefs ->
             prefs[themeKey]
+        }
+    }
+
+    override suspend fun setSkinTone(modifier: String?) {
+        store.edit { prefs ->
+            prefs[skinToneKey] = modifier.orEmpty()
+        }
+    }
+
+    override fun getSkinTone(): Flow<String?> {
+        return store.data.map { prefs ->
+            prefs[skinToneKey]?.ifEmpty { null }
         }
     }
 

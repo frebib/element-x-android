@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
@@ -47,6 +48,7 @@ fun <T : DropdownOption> PreferenceDropdown(
     title: String,
     selectedOption: T?,
     options: ImmutableList<T>,
+    selectedStyle: TextStyle = ElementTheme.typography.fontBodyMdRegular,
     onSelectOption: (T) -> Unit,
     modifier: Modifier = Modifier,
     supportingText: String? = null,
@@ -84,6 +86,7 @@ fun <T : DropdownOption> PreferenceDropdown(
                 DropdownTrailingContent(
                     dropDownIcon = dropDownIcon,
                     selectedOption = selectedOption,
+                    selectedStyle = selectedStyle,
                     options = options,
                     onSelectOption = onSelectOption,
                     expanded = isDropdownExpanded,
@@ -106,12 +109,16 @@ interface DropdownOption {
      * Returns the text to be displayed for this option.
      */
     @Composable
+    fun getSummary(): String? = null
+
+    @Composable
     fun getText(): String
 }
 
 @Composable
 private fun <T : DropdownOption> DropdownTrailingContent(
     selectedOption: T?,
+    selectedStyle: TextStyle = ElementTheme.typography.fontBodyMdRegular,
     options: ImmutableList<T>,
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
@@ -126,9 +133,9 @@ private fun <T : DropdownOption> DropdownTrailingContent(
         horizontalArrangement = Arrangement.End,
     ) {
         Text(
-            text = selectedOption?.getText().orEmpty(),
+            text = selectedOption?.getSummary() ?: selectedOption?.getText().orEmpty(),
             maxLines = 1,
-            style = ElementTheme.typography.fontBodyMdRegular,
+            style = selectedStyle,
             color = enabled.toSecondaryEnabledColor(),
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.End,
