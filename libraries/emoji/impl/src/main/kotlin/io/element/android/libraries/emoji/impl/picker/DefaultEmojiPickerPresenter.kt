@@ -22,6 +22,7 @@ import dev.zacsweers.metro.AssistedFactory
 import dev.zacsweers.metro.AssistedInject
 import dev.zacsweers.metro.ContributesBinding
 import io.element.android.emojibasebindings.Emoji
+import io.element.android.libraries.core.bool.orFalse
 import io.element.android.libraries.core.coroutine.CoroutineDispatchers
 import io.element.android.libraries.designsystem.theme.components.IconSource
 import io.element.android.libraries.designsystem.theme.components.SearchBarResultState
@@ -70,9 +71,11 @@ class DefaultEmojiPickerPresenter(
                         emojis = emojis,
                     )
                 }
-                val recentEmojis = recentEmojiUnicodes
-                    .mapNotNull { unicode -> store.allEmojis.find { it.unicode == unicode } }
-                    .toImmutableList()
+                val recentEmojis = recentEmojiUnicodes.mapNotNull { recentEmoji ->
+                    store.allEmojis.find {
+                        it.unicode == recentEmoji || it.skins?.any { skin -> skin.unicode == recentEmoji }.orFalse()
+                    }
+                }.distinct().toImmutableList()
                 val categories = if (recentEmojis.isEmpty()) {
                     baseCategories.toImmutableList()
                 } else {
