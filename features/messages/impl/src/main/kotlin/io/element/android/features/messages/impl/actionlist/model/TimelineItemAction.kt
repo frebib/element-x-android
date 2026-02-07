@@ -25,7 +25,7 @@ enum class TimelineItemAction(
     CopyLink(CommonStrings.action_copy_link_to_message, CompoundDrawables.ic_compound_link),
     Redact(CommonStrings.action_remove, CompoundDrawables.ic_compound_delete, destructive = true),
     Reply(CommonStrings.action_reply, CompoundDrawables.ic_compound_reply),
-    ReplyInThread(CommonStrings.action_reply_in_thread, CompoundDrawables.ic_compound_reply),
+    ReplyInThread(CommonStrings.action_reply_in_thread, CompoundDrawables.ic_compound_threads),
     Edit(CommonStrings.action_edit, CompoundDrawables.ic_compound_edit),
     EditPoll(CommonStrings.action_edit_poll, CompoundDrawables.ic_compound_edit),
     EditCaption(CommonStrings.action_edit_caption, CompoundDrawables.ic_compound_edit),
