@@ -8,17 +8,10 @@
 
 package io.element.android.libraries.matrix.api.core
 
-import io.element.android.libraries.androidutils.metadata.isInDebug
 import java.io.Serializable
 
 @kotlinx.serialization.Serializable
 @JvmInline
 value class RoomId(val value: String) : Serializable {
-    init {
-        if (isInDebug && !MatrixPatterns.isRoomId(value)) {
-            error("`$value` is not a valid room id.\n Example room id: `!room_id:domain`.")
-        }
-    }
-
     override fun toString(): String = value
 }
