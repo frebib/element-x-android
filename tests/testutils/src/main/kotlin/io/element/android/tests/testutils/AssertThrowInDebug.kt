@@ -8,14 +8,14 @@
 
 package io.element.android.tests.testutils
 
-import io.element.android.libraries.androidutils.metadata.isInDebug
+import io.element.android.libraries.androidutils.BuildConfig
 import org.junit.Assert.assertThrows
 
 /**
  * Assert that the lambda throws only on debug mode.
  */
 fun assertThrowsInDebug(lambda: () -> Any?) {
-    if (isInDebug) {
+    if (BuildConfig.DEBUG) {
         assertThrows(IllegalStateException::class.java) {
             lambda()
         }

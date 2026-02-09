@@ -8,7 +8,6 @@
 
 package io.element.android.libraries.matrix.api.core
 
-import io.element.android.libraries.androidutils.metadata.isInDebug
 import java.io.Serializable
 
 /**
@@ -18,12 +17,6 @@ import java.io.Serializable
  */
 @JvmInline
 value class UserId(val value: String) : Serializable {
-    init {
-        if (isInDebug && !MatrixPatterns.isUserId(value)) {
-            error("`$value` is not a valid user id.\nExample user id: `@name:domain`.")
-        }
-    }
-
     override fun toString(): String = value
 
     val extractedDisplayName: String
