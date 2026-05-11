@@ -231,13 +231,14 @@ cmd=("${kotlinComponentsPath}/scripts/build.sh" \
     -p "${rustSdkPath}" \
     -m sdk \
     -t "${target_arch}" \
-    -o "${elementPwd}/libraries/rustsdk")
+    -o "${elementPwd}/libraries/rustsdk" \
+    -r)
 
 echo "$" "${cmd[@]}"
 "${cmd[@]}"
 
 mv \
-    ./libraries/rustsdk/sdk-android-debug.aar \
+    ./libraries/rustsdk/sdk-android-release.aar \
     ./libraries/rustsdk/matrix-rust-sdk.aar
 
 mkdir -p ./libraries/rustsdk/sdks
