@@ -36,6 +36,7 @@ import io.element.android.features.location.api.LocationService
 import io.element.android.features.messages.api.timeline.TextPillificator
 import io.element.android.features.messages.impl.MessagesNavigator
 import io.element.android.features.messages.impl.attachments.Attachment
+import io.element.android.features.messages.impl.attachments.AttachmentCaptionHandOver
 import io.element.android.features.messages.impl.attachments.preview.error.sendAttachmentError
 import io.element.android.features.messages.impl.draft.ComposerDraftService
 import io.element.android.features.messages.impl.messagecomposer.suggestions.RoomAliasSuggestionsDataSource
@@ -131,6 +132,7 @@ class MessageComposerPresenter(
     private val analyticsService: AnalyticsService,
     private val locationService: LocationService,
     private val messageComposerContext: DefaultMessageComposerContext,
+    private val attachmentCaptionHandOver: AttachmentCaptionHandOver,
     private val richTextEditorStateFactory: RichTextEditorStateFactory,
     private val roomAliasSuggestionsDataSource: RoomAliasSuggestionsDataSource,
     private val permalinkParser: PermalinkParser,
@@ -192,22 +194,22 @@ class MessageComposerPresenter(
             .collectAsState(initial = false)
 
         val galleryMediaPicker = mediaPickerProvider.registerGalleryPicker { uri, mimeType ->
-            localCoroutineScope.handlePickedMedia(uri, mimeType)
+            localCoroutineScope.handlePickedMedia(uri, mimeType, caption = captionToHandOver(markdownTextEditorState, richTextEditorState))
         }
         val galleryMultiMediaPicker = mediaPickerProvider.registerGalleryMultiPicker { uris ->
-            localCoroutineScope.handlePickedMediaList(uris)
+            localCoroutineScope.handlePickedMediaList(uris, caption = captionToHandOver(markdownTextEditorState, richTextEditorState))
         }
         val filesPicker = mediaPickerProvider.registerFileMultiPicker(AnyMimeTypes) { uris ->
-            localCoroutineScope.handlePickedMediaList(uris, sendAsFile = true)
+            localCoroutineScope.handlePickedMediaList(uris, sendAsFile = true, caption = captionToHandOver(markdownTextEditorState, richTextEditorState))
         }
         val fileSinglePicker = mediaPickerProvider.registerFilePicker(AnyMimeTypes) { uri, mimeType ->
-            localCoroutineScope.handlePickedMedia(uri, mimeType ?: MimeTypes.OctetStream, sendAsFile = true)
+            localCoroutineScope.handlePickedMedia(uri, mimeType ?: MimeTypes.OctetStream, sendAsFile = true, caption = captionToHandOver(markdownTextEditorState, richTextEditorState))
         }
         val cameraPhotoPicker = mediaPickerProvider.registerCameraPhotoPicker { uri ->
-            localCoroutineScope.handlePickedMedia(uri, MimeTypes.Jpeg)
+            localCoroutineScope.handlePickedMedia(uri, MimeTypes.Jpeg, caption = captionToHandOver(markdownTextEditorState, richTextEditorState))
         }
         val cameraVideoPicker = mediaPickerProvider.registerCameraVideoPicker { uri ->
-            localCoroutineScope.handlePickedMedia(uri, MimeTypes.Mp4)
+            localCoroutineScope.handlePickedMedia(uri, MimeTypes.Mp4, caption = captionToHandOver(markdownTextEditorState, richTextEditorState))
         }
         val isFullScreen = rememberSaveable {
             mutableStateOf(false)
@@ -259,6 +261,11 @@ class MessageComposerPresenter(
         val slashCommandAction = remember { mutableStateOf<AsyncAction<Unit>>(AsyncAction.Uninitialized) }
 
         LaunchedEffect(Unit) {
+            if (attachmentCaptionHandOver.consumeSent(timelineController.mainTimelineMode())) {
+                setText("", markdownTextEditorState, richTextEditorState)
+                updateDraft(draft = null, isVolatile = false)
+                return@LaunchedEffect
+            }
             val draft = draftService.loadDraft(
                 roomId = room.roomId,
                 threadRoot = threadRoot,
@@ -660,6 +667,7 @@ class MessageComposerPresenter(
         uri: Uri?,
         mimeType: String? = null,
         sendAsFile: Boolean = false,
+        caption: String? = null,
     ) = launch {
         uri ?: return@launch
         val localMedia = createLocalMedia(
@@ -668,7 +676,7 @@ class MessageComposerPresenter(
         )
         val mediaAttachment = Attachment.Media(localMedia, sendAsFile = sendAsFile)
         val inReplyToEventId = (messageComposerContext.composerMode as? MessageComposerMode.Reply)?.eventId
-        navigator.navigateToPreviewAttachments(persistentListOf(mediaAttachment), inReplyToEventId)
+        navigator.navigateToPreviewAttachments(persistentListOf(mediaAttachment), inReplyToEventId, caption)
 
         resetComposerModeAfterAttaching()
     }
@@ -676,10 +684,11 @@ class MessageComposerPresenter(
     private fun CoroutineScope.handlePickedMediaList(
         uris: List<Uri>,
         sendAsFile: Boolean = false,
+        caption: String? = null,
     ) {
         if (uris.isEmpty()) return
         if (uris.size == 1) {
-            handlePickedMedia(uris.first(), sendAsFile = sendAsFile)
+            handlePickedMedia(uris.first(), sendAsFile = sendAsFile, caption = caption)
             return
         }
         launch {
@@ -691,10 +700,20 @@ class MessageComposerPresenter(
                 Attachment.Media(localMedia, sendAsFile = sendAsFile)
             }.toImmutableList()
             val inReplyToEventId = (messageComposerContext.composerMode as? MessageComposerMode.Reply)?.eventId
-            navigator.navigateToPreviewAttachments(attachments, inReplyToEventId)
+            navigator.navigateToPreviewAttachments(attachments, inReplyToEventId, caption)
 
             resetComposerModeAfterAttaching()
         }
+    }
+
+    private fun captionToHandOver(
+        markdownTextEditorState: MarkdownTextEditorState,
+        richTextEditorState: RichTextEditorState,
+    ): String? {
+        if (messageComposerContext.composerMode.isEditing) return null
+        return currentComposerMessage(markdownTextEditorState, richTextEditorState, withMentions = false)
+            .markdown
+            .takeIf { it.isNotBlank() }
     }
 
     private fun resetComposerModeAfterAttaching() {

@@ -25,6 +25,7 @@ import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
 import dev.zacsweers.metro.AssistedInject
 import io.element.android.features.messages.impl.attachments.Attachment
+import io.element.android.features.messages.impl.attachments.AttachmentCaptionHandOver
 import io.element.android.features.messages.impl.attachments.preview.imageeditor.AttachmentImageEditor
 import io.element.android.features.messages.impl.attachments.preview.imageeditor.AttachmentImageEditorState
 import io.element.android.features.messages.impl.attachments.preview.imageeditor.AttachmentImageEdits
@@ -68,10 +69,12 @@ class AttachmentsPreviewPresenter(
     @Assisted private val onDoneListener: OnDoneListener,
     @Assisted private val timelineMode: Timeline.Mode,
     @Assisted private val inReplyToEventId: EventId?,
+    @Assisted private val caption: String?,
     mediaSenderFactory: MediaSenderFactory,
     private val permalinkBuilder: PermalinkBuilder,
     private val temporaryUriDeleter: TemporaryUriDeleter,
     private val attachmentImageEditor: AttachmentImageEditor,
+    private val attachmentCaptionHandOver: AttachmentCaptionHandOver,
     private val mediaOptimizationSelectorPresenterFactory: MediaOptimizationSelectorPresenter.Factory,
     private val videoCompressionPresetSelector: VideoCompressionPresetSelector,
     private val sessionPreferencesStore: SessionPreferencesStore,
@@ -86,6 +89,7 @@ class AttachmentsPreviewPresenter(
             timelineMode: Timeline.Mode,
             onDoneListener: OnDoneListener,
             inReplyToEventId: EventId?,
+            caption: String?,
         ): AttachmentsPreviewPresenter
     }
 
@@ -110,7 +114,7 @@ class AttachmentsPreviewPresenter(
         var editedTempFiles by remember { mutableStateOf<Map<Int, File>>(emptyMap()) }
         val skinTone by sessionPreferencesStore.getSkinTone().collectAsState(initial = null)
 
-        val markdownTextEditorState = rememberMarkdownTextEditorState(initialText = null, initialFocus = false)
+        val markdownTextEditorState = rememberMarkdownTextEditorState(initialText = caption, initialFocus = false)
         val textEditorState by rememberUpdatedState(
             TextEditorState.Markdown(markdownTextEditorState, skinTone, isRoomEncrypted = null)
         )
@@ -552,6 +556,9 @@ class AttachmentsPreviewPresenter(
     }.fold(
         onSuccess = {
             mediaUploadInfos.forEach { cleanUp(it) }
+            if (this.caption != null) {
+                attachmentCaptionHandOver.onSent(timelineMode)
+            }
             sendActionState.value = SendActionState.Done
             onDoneListener()
         },
