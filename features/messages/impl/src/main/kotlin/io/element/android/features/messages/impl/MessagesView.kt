@@ -144,6 +144,8 @@ fun MessagesView(
     onEventContentClick: (isLive: Boolean, event: TimelineItem.Event) -> Boolean,
     onGalleryEventItemClick: (isLive: Boolean, event: TimelineItem.Event, index: Int) -> Boolean,
     onUserDataClick: (UserId) -> Unit,
+    @Suppress("UNUSED_PARAMETER") onMemberClick: (UserId) -> Unit,
+    onRoomStateClick: () -> Unit,
     onLinkClick: (String, Boolean) -> Unit,
     onSendLocationClick: () -> Unit,
     onCreatePollClick: () -> Unit,
@@ -310,6 +312,12 @@ fun MessagesView(
                             onJoinCallClick = onJoinCallClick,
                             forceJumpToBottomVisibility = forceJumpToBottomVisibility,
                             onViewAllPinnedMessagesClick = onViewAllPinnedMessagesClick,
+                            onMemberClick = { userId ->
+                                hidingKeyboard {
+                                    state.eventSink(MessagesEvent.OnMemberClicked(userId))
+                                }
+                            },
+                            onRoomStateClick = onRoomStateClick,
                             knockRequestsBannerView = knockRequestsBannerView,
                         )
 
@@ -514,6 +522,8 @@ private fun MessagesViewContent(
     onJoinCallClick: (isAudioCall: Boolean) -> Unit,
     forceJumpToBottomVisibility: Boolean,
     onSwipeToReply: (TimelineItem.Event) -> Unit,
+    onMemberClick: (UserId) -> Unit,
+    onRoomStateClick: () -> Unit,
     modifier: Modifier = Modifier,
     knockRequestsBannerView: @Composable () -> Unit,
 ) {
@@ -571,6 +581,8 @@ private fun MessagesViewContent(
                 onReadReceiptClick = onReadReceiptClick,
                 onJoinCallClick = onJoinCallClick,
                 forceJumpToBottomVisibility = forceJumpToBottomVisibility,
+                onMemberClick = onMemberClick,
+                onRoomStateClick = onRoomStateClick,
                 nestedScrollConnection = scrollBehavior.nestedScrollConnection,
                 floatingDateTopOffset = topBannersHeightDp,
             )
@@ -705,6 +717,8 @@ internal fun MessagesViewPreview(@PreviewParameter(MessagesStatePreviewParam::cl
         onEventContentClick = { _, _ -> false },
         onGalleryEventItemClick = { _, _, _ -> false },
         onUserDataClick = {},
+        onMemberClick = {},
+        onRoomStateClick = {},
         onLinkClick = { _, _ -> },
         onSendLocationClick = {},
         onCreatePollClick = {},
@@ -762,6 +776,8 @@ internal fun MessagesViewA11yPreview() = ElementPreview {
         onEventContentClick = { _, _ -> false },
         onGalleryEventItemClick = { _, _, _ -> false },
         onUserDataClick = {},
+        onMemberClick = {},
+        onRoomStateClick = {},
         onLinkClick = { _, _ -> },
         onSendLocationClick = {},
         onCreatePollClick = {},
