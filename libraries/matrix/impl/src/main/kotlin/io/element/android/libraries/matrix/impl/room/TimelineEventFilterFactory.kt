@@ -35,19 +35,8 @@ class RustTimelineEventFilterFactory : TimelineEventFilterFactory {
         val excludedEventTypes = excludedStateTypes.map { stateEventType ->
             TimelineEventCondition.EventType(TimelineEventType.fromState(stateEventType))
         }
-        // If the room is publicly joinable and not encrypted, we also want to exclude membership changes and profile changes,
-        // as they will pollute the timelines since they're quite common and not add much value.
-        val excludedMembershipChanges = if (joinRule !is JoinRule.Invite && isEncrypted == false) {
-            listOf(
-                TimelineEventCondition.MembershipChange(MembershipChangeFilter.JOIN),
-                TimelineEventCondition.MembershipChange(MembershipChangeFilter.LEAVE),
-                TimelineEventCondition.ProfileChange,
-            )
-        } else {
-            emptyList()
-        }
-        return if (excludedEventTypes.isNotEmpty() || excludedMembershipChanges.isNotEmpty()) {
-            TimelineEventFilter.Exclude(excludedEventTypes + excludedMembershipChanges)
+        return if (excludedEventTypes.isNotEmpty()) {
+            TimelineEventFilter.Exclude(excludedEventTypes)
         } else {
             null
         }
