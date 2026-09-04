@@ -154,6 +154,7 @@ fun MessagesView(
     onViewAllPinnedMessagesClick: () -> Unit,
     onThreadsListClick: () -> Unit,
     knockRequestsBannerView: @Composable () -> Unit,
+    onSearchClick: () -> Unit,
     modifier: Modifier = Modifier,
     forceJumpToBottomVisibility: Boolean = false,
     customReactionBottomSheet: @Composable () -> Unit,
@@ -258,9 +259,11 @@ fun MessagesView(
                             menuActions = {
                                 MessagesMenuActions(
                                     displayThreads = state.timelineState.timelineMode !is Timeline.Mode.Thread && state.threads.hasThreads,
+                                    displaySearch = state.canSearch,
                                     roomCallState = state.roomCallState,
                                     onJoinCallClick = onJoinCallClick,
-                                    onThreadsListClick = onThreadsListClick
+                                    onThreadsListClick = onThreadsListClick,
+                                    onSearchClick = onSearchClick,
                                 )
                             }
                         )
@@ -485,15 +488,25 @@ fun MessagesView(
 @Composable
 internal fun RowScope.MessagesMenuActions(
     displayThreads: Boolean,
+    displaySearch: Boolean,
     roomCallState: RoomCallState,
     onJoinCallClick: (isAudioCall: Boolean) -> Unit,
     onThreadsListClick: () -> Unit,
+    onSearchClick: () -> Unit,
 ) {
     if (displayThreads) {
         Icon(
             modifier = Modifier.clickable(enabled = true, onClick = onThreadsListClick),
             imageVector = CompoundIcons.ThreadsSolid(),
             contentDescription = stringResource(CommonStrings.common_threads),
+        )
+        Spacer(Modifier.width(8.dp))
+    }
+    if (displaySearch) {
+        Icon(
+            modifier = Modifier.clickable(enabled = true, onClick = onSearchClick),
+            imageVector = CompoundIcons.Search(),
+            contentDescription = stringResource(CommonStrings.action_search),
         )
         Spacer(Modifier.width(8.dp))
     }
@@ -742,6 +755,7 @@ internal fun MessagesViewPreview(@PreviewParameter(MessagesStatePreviewParam::cl
         knockRequestsBannerView = {},
         customReactionBottomSheet = {},
         onThreadsListClick = {},
+        onSearchClick = {},
     )
 }
 
@@ -798,6 +812,7 @@ internal fun MessagesViewA11yPreview() = ElementPreview {
         onJoinCallClick = {},
         onViewAllPinnedMessagesClick = {},
         onThreadsListClick = {},
+        onSearchClick = {},
         forceJumpToBottomVisibility = true,
         knockRequestsBannerView = {},
         customReactionBottomSheet = {},

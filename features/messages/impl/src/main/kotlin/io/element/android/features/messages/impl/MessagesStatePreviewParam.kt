@@ -133,6 +133,7 @@ fun aMessagesState(
     ),
     isCurrentlySharingLiveLocationInRoom: Boolean = false,
     dmUserStatus: DisplayedStatus? = null,
+    canSearch: Boolean = false,
     eventSink: (MessagesEvent) -> Unit = {},
     redactEventAction: AsyncAction<Unit> = AsyncAction.Uninitialized,
 ) = MessagesState(
@@ -166,6 +167,7 @@ fun aMessagesState(
     showLiveLocationShareBanner = isCurrentlySharingLiveLocationInRoom,
     dmUserStatus = dmUserStatus,
     redactEventAction = redactEventAction,
+    canSearch = canSearch,
     eventSink = eventSink,
 )
 

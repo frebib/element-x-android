@@ -370,6 +370,10 @@ class MessagesFlowNode(
                         backstack.push(NavTarget.ThreadsList)
                     }
 
+                    override fun navigateToMessageSearch() {
+                        callback.navigateToMessageSearch()
+                    }
+
                     override fun navigateToDeveloperSettings() {
                         callback.navigateToDeveloperSettings()
                     }
