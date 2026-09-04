@@ -64,6 +64,8 @@ data class MessagesState(
     val threads: Threads,
     val showLiveLocationShareBanner: Boolean,
     val redactEventAction: AsyncAction<Unit>,
+    /** Whether the message search entry point is available in the top bar. */
+    val canSearch: Boolean,
     val eventSink: (MessagesEvent) -> Unit
 ) {
     val isTombstoned = successorRoom != null
